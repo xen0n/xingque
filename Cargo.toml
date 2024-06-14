@@ -13,5 +13,5 @@ name = "python_starlark_rs"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = "0.21.1"
+pyo3 = { version = "0.21.1", features = ["multiple-pymethods"] }
 starlark = "0.12.0"
