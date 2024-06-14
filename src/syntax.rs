@@ -3,7 +3,7 @@ use pyo3::prelude::*;
 use pyo3::types::PyString;
 use starlark::syntax::{AstModule, Dialect, DialectTypes};
 
-#[pyclass(name = "DialectTypes")]
+#[pyclass(module = "starlark_pyo3", name = "DialectTypes")]
 pub(crate) enum PyDialectTypes {
     #[pyo3(name = "DISABLE")]
     Disable,
@@ -70,7 +70,7 @@ impl From<DialectTypes> for PyDialectTypes {
     }
 }
 
-#[pyclass(name = "Dialect")]
+#[pyclass(module = "starlark_pyo3", name = "Dialect")]
 pub(crate) struct PyDialect {
     inner: Dialect,
 }
@@ -182,7 +182,7 @@ impl PyDialect {
     }
 }
 
-#[pyclass(name = "AstModule")]
+#[pyclass(module = "starlark_pyo3", name = "AstModule")]
 pub(crate) struct PyAstModule {
     inner: AstModule,
 }
