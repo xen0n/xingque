@@ -169,7 +169,7 @@ impl PyResolvedSpan {
 }
 
 #[pyclass(module = "starlark_pyo3", name = "Span")]
-pub(crate) struct PySpan(Span);
+pub(crate) struct PySpan(pub(crate) Span);
 
 impl From<Span> for PySpan {
     fn from(value: Span) -> Self {
@@ -317,6 +317,7 @@ impl PyCodeMap {
 }
 
 #[pyclass(module = "starlark_pyo3", name = "FileSpan")]
+#[derive(Clone)]
 pub(crate) struct PyFileSpan(FileSpan);
 
 impl From<FileSpan> for PyFileSpan {

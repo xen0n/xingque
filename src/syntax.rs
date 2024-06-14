@@ -1,8 +1,11 @@
+use std::collections::HashMap;
+
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::PyString;
-use starlark::syntax::{AstModule, Dialect, DialectTypes};
+use starlark::syntax::{AstLoad, AstModule, Dialect, DialectTypes};
 
+use crate::codemap::{PyFileSpan, PySpan};
 use crate::repr_utils::{PyReprBool, PyReprDialectTypes};
 
 #[pyclass(module = "starlark_pyo3", name = "DialectTypes")]
@@ -235,6 +238,57 @@ impl PyAstModule {
         match AstModule::parse(filename, content, &dialect.0) {
             Ok(x) => Ok(x.into()),
             Err(e) => Err(PyValueError::new_err(e.to_string())),
+        }
+    }
+
+    #[getter]
+    fn loads(&self) -> Vec<PyAstLoad> {
+        self.0.loads().into_iter().map(Into::into).collect()
+    }
+
+    fn file_span(&self, x: &PySpan) -> PyFileSpan {
+        self.0.file_span(x.0).into()
+    }
+
+    #[getter]
+    fn stmt_locations(&self) -> Vec<PyFileSpan> {
+        self.0
+            .stmt_locations()
+            .into_iter()
+            .map(Into::into)
+            .collect()
+    }
+
+    fn replace_binary_operators(&mut self, replace: HashMap<String, String>) {
+        self.0.replace_binary_operators(&replace);
+    }
+}
+
+#[pyclass(module = "starlark_pyo3", name = "AstLoad")]
+pub(crate) struct PyAstLoad {
+    /// Span where this load is written
+    #[pyo3(get)]
+    span: PyFileSpan,
+    /// Module being loaded
+    #[pyo3(get)]
+    module_id: String,
+    /// Symbols loaded from that module (local ident -> source ident)
+    #[pyo3(get)]
+    symbols: HashMap<String, String>,
+}
+
+impl<'py> From<AstLoad<'py>> for PyAstLoad {
+    fn from(value: AstLoad<'py>) -> Self {
+        Self {
+            span: value.span.into(),
+            module_id: value.module_id.to_string(),
+            symbols: {
+                let mut x: HashMap<String, String> = HashMap::new();
+                for (k, v) in value.symbols.iter() {
+                    x.insert(k.to_string(), v.to_string());
+                }
+                x
+            },
         }
     }
 }
