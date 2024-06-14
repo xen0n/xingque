@@ -1,5 +1,5 @@
 use pyo3::{exceptions::PyValueError, prelude::*};
-use starlark::codemap::{Pos, Span};
+use starlark::codemap::{CodeMap, Pos, Span};
 
 #[pyclass(module = "starlark_pyo3", name = "Pos")]
 pub(crate) struct PyPos(Pos);
@@ -51,6 +51,12 @@ impl<'py> FromPyObject<'py> for PyPos {
 
 #[pyclass(module = "starlark_pyo3", name = "Span")]
 pub(crate) struct PySpan(Span);
+
+impl From<Span> for PySpan {
+    fn from(value: Span) -> Self {
+        Self(value)
+    }
+}
 
 #[pymethods]
 impl PySpan {
@@ -114,5 +120,69 @@ impl PySpan {
 
     fn contains(&self, pos: &Bound<'_, PyAny>) -> PyResult<bool> {
         self.__contains__(pos)
+    }
+}
+
+#[pyclass(module = "starlark_pyo3", name = "CodeMap")]
+pub(crate) struct PyCodeMap(CodeMap);
+
+#[pymethods]
+impl PyCodeMap {
+    #[new]
+    fn py_new(filename: String, source: String) -> Self {
+        Self(CodeMap::new(filename, source))
+    }
+
+    #[staticmethod]
+    fn empty_static() -> Self {
+        todo!();
+    }
+
+    // TODO: is it necessary to wrap id()?
+
+    fn full_span(&self) -> PySpan {
+        self.0.full_span().into()
+    }
+
+    // TODO: file_span()
+
+    #[getter]
+    fn filename(&self) -> &str {
+        self.0.filename()
+    }
+
+    fn byte_at(&self, pos: &PyPos) -> u8 {
+        self.0.byte_at(pos.0)
+    }
+
+    fn find_line(&self, pos: &PyPos) -> usize {
+        self.0.find_line(pos.0)
+    }
+
+    #[getter]
+    fn source(&self) -> &str {
+        self.0.source()
+    }
+
+    fn source_span(&self, span: &PySpan) -> &str {
+        self.0.source_span(span.0)
+    }
+
+    fn line_span(&self, line: usize) -> PySpan {
+        PySpan(self.0.line_span(line))
+    }
+
+    fn line_span_opt(&self, line: usize) -> Option<PySpan> {
+        self.0.line_span_opt(line).map(PySpan)
+    }
+
+    // TODO: resolve_span()
+
+    fn source_line(&self, line: usize) -> &str {
+        self.0.source_line(line)
+    }
+
+    fn source_line_at_pos(&self, pos: &PyPos) -> &str {
+        self.0.source_line_at_pos(pos.0)
     }
 }
