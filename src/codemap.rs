@@ -1,5 +1,5 @@
 use pyo3::{exceptions::PyValueError, prelude::*};
-use starlark::codemap::{CodeMap, Pos, Span};
+use starlark::codemap::{CodeMap, Pos, ResolvedPos, Span};
 
 #[pyclass(module = "starlark_pyo3", name = "Pos")]
 pub(crate) struct PyPos(Pos);
@@ -46,6 +46,48 @@ impl PyPos {
 impl<'py> FromPyObject<'py> for PyPos {
     fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
         Ok(Self::py_new(ob.extract()?))
+    }
+}
+
+#[pyclass(module = "starlark_pyo3", name = "ResolvedPos")]
+pub(crate) struct PyResolvedPos(ResolvedPos);
+
+impl From<ResolvedPos> for PyResolvedPos {
+    fn from(value: ResolvedPos) -> Self {
+        Self(value)
+    }
+}
+
+#[pymethods]
+impl PyResolvedPos {
+    #[new]
+    fn py_new(line: usize, column: usize) -> Self {
+        ResolvedPos { line, column }.into()
+    }
+
+    fn __repr__(slf: &Bound<'_, Self>) -> PyResult<String> {
+        let class_name = slf.get_type().qualname()?;
+        let me = slf.borrow();
+        Ok(format!("{}(line={}, column={})", class_name, me.0.line, me.0.column))
+    }
+
+    fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
+        // TODO: handle Tuple[int, int]
+        if let Ok(other) = other.downcast::<PyResolvedPos>() {
+            self.0 == other.borrow().0
+        } else {
+            false
+        }
+    }
+
+    #[getter]
+    fn line(&self) -> usize {
+        self.0.line
+    }
+
+    #[getter]
+    fn column(&self) -> usize {
+        self.0.column
     }
 }
 
