@@ -1,5 +1,5 @@
 use pyo3::{exceptions::PyValueError, prelude::*};
-use starlark::codemap::{CodeMap, Pos, ResolvedPos, Span};
+use starlark::codemap::{CodeMap, Pos, ResolvedPos, ResolvedSpan, Span};
 
 #[pyclass(module = "starlark_pyo3", name = "Pos")]
 pub(crate) struct PyPos(Pos);
@@ -68,7 +68,16 @@ impl PyResolvedPos {
     fn __repr__(slf: &Bound<'_, Self>) -> PyResult<String> {
         let class_name = slf.get_type().qualname()?;
         let me = slf.borrow();
-        Ok(format!("{}(line={}, column={})", class_name, me.0.line, me.0.column))
+        Ok(me.repr(Some(&class_name)))
+    }
+
+    fn repr(&self, class_name: Option<&str>) -> String {
+        format!(
+            "{}(line={}, column={})",
+            class_name.unwrap_or("ResolvedPos"),
+            self.0.line,
+            self.0.column
+        )
     }
 
     fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
@@ -88,6 +97,72 @@ impl PyResolvedPos {
     #[getter]
     fn column(&self) -> usize {
         self.0.column
+    }
+}
+
+#[pyclass(module = "starlark_pyo3", name = "ResolvedSpan")]
+pub(crate) struct PyResolvedSpan(ResolvedSpan);
+
+impl From<ResolvedSpan> for PyResolvedSpan {
+    fn from(value: ResolvedSpan) -> Self {
+        Self(value)
+    }
+}
+
+#[pymethods]
+impl PyResolvedSpan {
+    #[new]
+    fn py_new(begin: &PyResolvedPos, end: &PyResolvedPos) -> Self {
+        ResolvedSpan {
+            begin: begin.0,
+            end: end.0,
+        }
+        .into()
+    }
+
+    fn __repr__(slf: &Bound<'_, Self>) -> PyResult<String> {
+        let class_name = slf.get_type().qualname()?;
+        let me = slf.borrow();
+        Ok(format!(
+            "{}(begin={}, end={})",
+            class_name,
+            me.begin().repr(None),
+            me.end().repr(None)
+        ))
+    }
+
+    fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
+        // TODO: handle Tuple[int, int]
+        if let Ok(other) = other.downcast::<PyResolvedSpan>() {
+            self.0 == other.borrow().0
+        } else {
+            false
+        }
+    }
+
+    #[getter]
+    fn begin(&self) -> PyResolvedPos {
+        self.0.begin.into()
+    }
+
+    #[getter]
+    fn end(&self) -> PyResolvedPos {
+        self.0.end.into()
+    }
+
+    fn __contains__(&self, pos: &Bound<'_, PyAny>) -> PyResult<bool> {
+        // TODO: handle Tuple[int, int]
+        if let Ok(pos) = pos.downcast::<PyResolvedPos>() {
+            Ok(self.0.contains(pos.borrow().0))
+        } else {
+            Err(PyValueError::new_err(
+                "invalid operand type for ResolvedSpan.__contains__",
+            ))
+        }
+    }
+
+    fn contains(&self, pos: &Bound<'_, PyAny>) -> PyResult<bool> {
+        self.__contains__(pos)
     }
 }
 
@@ -218,7 +293,9 @@ impl PyCodeMap {
         self.0.line_span_opt(line).map(PySpan)
     }
 
-    // TODO: resolve_span()
+    fn resolve_span(&self, span: &PySpan) -> PyResolvedSpan {
+        self.0.resolve_span(span.0).into()
+    }
 
     fn source_line(&self, line: usize) -> &str {
         self.0.source_line(line)
