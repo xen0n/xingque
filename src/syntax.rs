@@ -190,6 +190,15 @@ pub(crate) struct PyAstModule {
 #[pymethods]
 impl PyAstModule {
     #[staticmethod]
+    #[pyo3(signature = (path, dialect = &PyDialect::STANDARD))]
+    fn parse_file(path: ::std::path::PathBuf, dialect: &PyDialect) -> PyResult<Self> {
+        match AstModule::parse_file(&path, &dialect.inner) {
+            Ok(inner) => Ok(Self { inner }),
+            Err(e) => Err(PyValueError::new_err(e.to_string())),
+        }
+    }
+
+    #[staticmethod]
     #[pyo3(signature = (filename, content, dialect = &PyDialect::STANDARD))]
     fn parse(filename: &str, content: String, dialect: &PyDialect) -> PyResult<Self> {
         match AstModule::parse(filename, content, &dialect.inner) {
