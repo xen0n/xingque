@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
 mod codemap;
+mod repr_utils;
 mod syntax;
 
 /// A Python module implemented in Rust.

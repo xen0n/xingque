@@ -3,6 +3,8 @@ use pyo3::prelude::*;
 use pyo3::types::PyString;
 use starlark::syntax::{AstModule, Dialect, DialectTypes};
 
+use crate::repr_utils::{PyReprBool, PyReprDialectTypes};
+
 #[pyclass(module = "starlark_pyo3", name = "DialectTypes")]
 pub(crate) enum PyDialectTypes {
     #[pyo3(name = "DISABLE")]
@@ -11,6 +13,19 @@ pub(crate) enum PyDialectTypes {
     ParseOnly,
     #[pyo3(name = "ENABLE")]
     Enable,
+}
+
+#[pymethods]
+impl PyDialectTypes {
+    fn __repr__(slf: &Bound<'_, Self>) -> PyResult<String> {
+        let me: &Self = &slf.borrow();
+        let desc: &str = me.into();
+        Ok(format!("DialectTypes.{}", desc))
+    }
+
+    fn __str__(&self) -> &str {
+        self.into()
+    }
 }
 
 impl TryFrom<&str> for PyDialectTypes {
@@ -29,9 +44,9 @@ impl TryFrom<&str> for PyDialectTypes {
 impl From<&PyDialectTypes> for &str {
     fn from(value: &PyDialectTypes) -> Self {
         match value {
-            PyDialectTypes::Disable => "disable",
-            PyDialectTypes::ParseOnly => "parse-only",
-            PyDialectTypes::Enable => "enable",
+            PyDialectTypes::Disable => "DISABLE",
+            PyDialectTypes::ParseOnly => "PARSE_ONLY",
+            PyDialectTypes::Enable => "ENABLE",
         }
     }
 }
@@ -130,6 +145,23 @@ trivial_bool_prop!(
 
 #[pymethods]
 impl PyDialect {
+    fn __repr__(slf: &Bound<'_, Self>) -> PyResult<String> {
+        let class_name = slf.get_type().qualname()?;
+        let me = slf.borrow();
+        Ok(format!(
+            "{}(enable_def={}, enable_lambda={}, enable_load={}, enable_keyword_only_arguments={}, enable_types={}, enable_load_reexport={}, enable_top_level_stmt={}, enable_f_strings={})",
+            class_name,
+            PyReprBool(me.inner.enable_def),
+            PyReprBool(me.inner.enable_lambda),
+            PyReprBool(me.inner.enable_load),
+            PyReprBool(me.inner.enable_keyword_only_arguments),
+            PyReprDialectTypes(me.inner.enable_types),
+            PyReprBool(me.inner.enable_load_reexport),
+            PyReprBool(me.inner.enable_top_level_stmt),
+            PyReprBool(me.inner.enable_f_strings),
+        ))
+    }
+
     #[classattr]
     const EXTENDED: Self = Self {
         inner: Dialect::Extended,
