@@ -1,5 +1,7 @@
 use pyo3::{exceptions::PyValueError, prelude::*};
-use starlark::codemap::{CodeMap, Pos, ResolvedPos, ResolvedSpan, Span};
+use starlark::codemap::{
+    CodeMap, FileSpan, Pos, ResolvedFileLine, ResolvedFileSpan, ResolvedPos, ResolvedSpan, Span,
+};
 
 #[pyclass(module = "starlark_pyo3", name = "Pos")]
 pub(crate) struct PyPos(Pos);
@@ -243,6 +245,12 @@ impl PySpan {
 #[pyclass(module = "starlark_pyo3", name = "CodeMap")]
 pub(crate) struct PyCodeMap(CodeMap);
 
+impl From<CodeMap> for PyCodeMap {
+    fn from(value: CodeMap) -> Self {
+        Self(value)
+    }
+}
+
 #[pymethods]
 impl PyCodeMap {
     #[new]
@@ -261,7 +269,9 @@ impl PyCodeMap {
         self.0.full_span().into()
     }
 
-    // TODO: file_span()
+    fn file_span(&self, span: &PySpan) -> PyFileSpan {
+        self.0.file_span(span.0).into()
+    }
 
     #[getter]
     fn filename(&self) -> &str {
@@ -303,5 +313,160 @@ impl PyCodeMap {
 
     fn source_line_at_pos(&self, pos: &PyPos) -> &str {
         self.0.source_line_at_pos(pos.0)
+    }
+}
+
+#[pyclass(module = "starlark_pyo3", name = "FileSpan")]
+pub(crate) struct PyFileSpan(FileSpan);
+
+impl From<FileSpan> for PyFileSpan {
+    fn from(value: FileSpan) -> Self {
+        Self(value)
+    }
+}
+
+#[pymethods]
+impl PyFileSpan {
+    #[new]
+    fn py_new(filename: String, source: String) -> Self {
+        FileSpan::new(filename, source).into()
+    }
+
+    #[getter]
+    fn file(&self) -> PyCodeMap {
+        self.0.file.clone().into()
+    }
+
+    #[getter]
+    fn span(&self) -> PySpan {
+        self.0.span.into()
+    }
+
+    #[getter]
+    fn filename(&self) -> &str {
+        self.0.filename()
+    }
+
+    #[getter]
+    fn source_span(&self) -> &str {
+        self.0.source_span()
+    }
+
+    fn resolve_span(&self) -> PyResolvedSpan {
+        self.0.resolve_span().into()
+    }
+
+    fn resolve(&self) -> PyResolvedFileSpan {
+        self.0.resolve().into()
+    }
+}
+
+#[pyclass(module = "starlark_pyo3", name = "ResolvedFileLine")]
+pub(crate) struct PyResolvedFileLine(ResolvedFileLine);
+
+impl From<ResolvedFileLine> for PyResolvedFileLine {
+    fn from(value: ResolvedFileLine) -> Self {
+        Self(value)
+    }
+}
+
+#[pymethods]
+impl PyResolvedFileLine {
+    #[new]
+    fn py_new(file: String, line: usize) -> Self {
+        ResolvedFileLine { file, line }.into()
+    }
+
+    fn __repr__(slf: &Bound<'_, Self>) -> PyResult<String> {
+        let class_name = slf.get_type().qualname()?;
+        let me = slf.borrow();
+        Ok(format!(
+            "{}(file={:?}, line={})",
+            class_name, me.0.file, me.0.line,
+        ))
+    }
+
+    fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
+        match other.downcast::<PyResolvedFileLine>() {
+            Ok(other) => self.0 == other.borrow().0,
+            Err(_) => false,
+        }
+    }
+
+    #[getter]
+    fn get_file(&self) -> &str {
+        &self.0.file
+    }
+
+    #[setter]
+    fn set_file(&mut self, x: String) {
+        self.0.file = x;
+    }
+
+    #[getter]
+    fn get_line(&self) -> usize {
+        self.0.line
+    }
+
+    #[setter]
+    fn set_line(&mut self, x: usize) {
+        self.0.line = x;
+    }
+}
+
+#[pyclass(module = "starlark_pyo3", name = "ResolvedFileSpan")]
+pub(crate) struct PyResolvedFileSpan(ResolvedFileSpan);
+
+impl From<ResolvedFileSpan> for PyResolvedFileSpan {
+    fn from(value: ResolvedFileSpan) -> Self {
+        Self(value)
+    }
+}
+
+#[pymethods]
+impl PyResolvedFileSpan {
+    #[new]
+    fn py_new(file: String, span: &PyResolvedSpan) -> Self {
+        ResolvedFileSpan { file, span: span.0 }.into()
+    }
+
+    fn __repr__(slf: &Bound<'_, Self>) -> PyResult<String> {
+        let class_name = slf.get_type().qualname()?;
+        let me = slf.borrow();
+        Ok(format!(
+            "{}(file={:?}, span={})",
+            class_name, me.0.file, me.0.span,
+        ))
+    }
+
+    fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
+        match other.downcast::<PyResolvedFileSpan>() {
+            Ok(other) => self.0 == other.borrow().0,
+            Err(_) => false,
+        }
+    }
+
+    #[getter]
+    fn get_file(&self) -> &str {
+        &self.0.file
+    }
+
+    #[setter]
+    fn set_file(&mut self, x: String) {
+        self.0.file = x;
+    }
+
+    #[getter]
+    fn get_span(&self) -> PyResolvedSpan {
+        self.0.span.into()
+    }
+
+    #[setter]
+    fn set_span(&mut self, x: &PyResolvedSpan) {
+        self.0.span = x.0;
+    }
+
+    fn begin_file_line(&self) -> PyResolvedFileLine {
+        self.0.begin_file_line().into()
     }
 }

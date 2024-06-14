@@ -8,7 +8,10 @@ mod syntax;
 #[pymodule]
 fn starlark_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<codemap::PyCodeMap>()?;
+    m.add_class::<codemap::PyFileSpan>()?;
     m.add_class::<codemap::PyPos>()?;
+    m.add_class::<codemap::PyResolvedFileLine>()?;
+    m.add_class::<codemap::PyResolvedFileSpan>()?;
     m.add_class::<codemap::PyResolvedPos>()?;
     m.add_class::<codemap::PyResolvedSpan>()?;
     m.add_class::<codemap::PySpan>()?;
