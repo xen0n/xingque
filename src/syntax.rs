@@ -86,9 +86,7 @@ impl From<DialectTypes> for PyDialectTypes {
 }
 
 #[pyclass(module = "starlark_pyo3", name = "Dialect")]
-pub(crate) struct PyDialect {
-    inner: Dialect,
-}
+pub(crate) struct PyDialect(Dialect);
 
 macro_rules! trivial_bool_prop {
     // still no concat_idents! so we have to duplicate a little
@@ -98,12 +96,12 @@ macro_rules! trivial_bool_prop {
         impl $cls {
             #[getter]
             fn $getter_name(&self) -> PyResult<bool> {
-                Ok(self.inner.$field)
+                Ok(self.0.$field)
             }
 
             #[setter]
             fn $setter_name(&mut self, value: bool) -> PyResult<()> {
-                self.inner.$field = value;
+                self.0.$field = value;
                 Ok(())
             }
         }
@@ -151,34 +149,31 @@ impl PyDialect {
         Ok(format!(
             "{}(enable_def={}, enable_lambda={}, enable_load={}, enable_keyword_only_arguments={}, enable_types={}, enable_load_reexport={}, enable_top_level_stmt={}, enable_f_strings={})",
             class_name,
-            PyReprBool(me.inner.enable_def),
-            PyReprBool(me.inner.enable_lambda),
-            PyReprBool(me.inner.enable_load),
-            PyReprBool(me.inner.enable_keyword_only_arguments),
-            PyReprDialectTypes(me.inner.enable_types),
-            PyReprBool(me.inner.enable_load_reexport),
-            PyReprBool(me.inner.enable_top_level_stmt),
-            PyReprBool(me.inner.enable_f_strings),
+            PyReprBool(me.0.enable_def),
+            PyReprBool(me.0.enable_lambda),
+            PyReprBool(me.0.enable_load),
+            PyReprBool(me.0.enable_keyword_only_arguments),
+            PyReprDialectTypes(me.0.enable_types),
+            PyReprBool(me.0.enable_load_reexport),
+            PyReprBool(me.0.enable_top_level_stmt),
+            PyReprBool(me.0.enable_f_strings),
         ))
     }
 
     #[classattr]
-    const EXTENDED: Self = Self {
-        inner: Dialect::Extended,
-    };
+    const EXTENDED: Self = Self(Dialect::Extended);
+
     #[classattr]
-    const STANDARD: Self = Self {
-        inner: Dialect::Standard,
-    };
+    const STANDARD: Self = Self(Dialect::Standard);
 
     #[getter]
     fn get_enable_types(&self) -> PyResult<PyDialectTypes> {
-        Ok(self.inner.enable_types.into())
+        Ok(self.0.enable_types.into())
     }
 
     #[setter]
     fn set_enable_types(&mut self, value: PyDialectTypes) -> PyResult<()> {
-        self.inner.enable_types = value.into();
+        self.0.enable_types = value.into();
         Ok(())
     }
 
@@ -193,7 +188,7 @@ impl PyDialect {
         enable_top_level_stmt: Option<bool>,
         enable_f_strings: Option<bool>,
     ) -> PyResult<Self> {
-        let inner = Dialect {
+        Ok(Dialect {
             enable_def: enable_def.unwrap_or(false),
             enable_lambda: enable_lambda.unwrap_or(false),
             enable_load: enable_load.unwrap_or(false),
@@ -203,20 +198,24 @@ impl PyDialect {
             enable_top_level_stmt: enable_top_level_stmt.unwrap_or(false),
             enable_f_strings: enable_f_strings.unwrap_or(false),
             ..Dialect::default()
-        };
-        Ok(Self::new(inner))
+        }
+        .into())
     }
 }
 
-impl PyDialect {
-    fn new(inner: Dialect) -> Self {
-        Self { inner }
+impl From<Dialect> for PyDialect {
+    fn from(value: Dialect) -> Self {
+        Self(value)
     }
 }
 
 #[pyclass(module = "starlark_pyo3", name = "AstModule")]
-pub(crate) struct PyAstModule {
-    inner: AstModule,
+pub(crate) struct PyAstModule(AstModule);
+
+impl From<AstModule> for PyAstModule {
+    fn from(value: AstModule) -> Self {
+        Self(value)
+    }
 }
 
 #[pymethods]
@@ -224,8 +223,8 @@ impl PyAstModule {
     #[staticmethod]
     #[pyo3(signature = (path, dialect = &PyDialect::STANDARD))]
     fn parse_file(path: ::std::path::PathBuf, dialect: &PyDialect) -> PyResult<Self> {
-        match AstModule::parse_file(&path, &dialect.inner) {
-            Ok(inner) => Ok(Self { inner }),
+        match AstModule::parse_file(&path, &dialect.0) {
+            Ok(x) => Ok(x.into()),
             Err(e) => Err(PyValueError::new_err(e.to_string())),
         }
     }
@@ -233,8 +232,8 @@ impl PyAstModule {
     #[staticmethod]
     #[pyo3(signature = (filename, content, dialect = &PyDialect::STANDARD))]
     fn parse(filename: &str, content: String, dialect: &PyDialect) -> PyResult<Self> {
-        match AstModule::parse(filename, content, &dialect.inner) {
-            Ok(inner) => Ok(Self { inner }),
+        match AstModule::parse(filename, content, &dialect.0) {
+            Ok(x) => Ok(x.into()),
             Err(e) => Err(PyValueError::new_err(e.to_string())),
         }
     }
