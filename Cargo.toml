@@ -1,15 +1,15 @@
 [package]
-name = "python-starlark-rs"
+name = "starlark-pyo3"
 version = "0.1.0"
 authors = ["WANG Xuerui <git@xen0n.name>"]
 description = "A Python binding to starlark-rs"
 license = "Apache-2.0 OR MIT"
 edition = "2021"
-repository = "https://github.com/xen0n/python-starlark-rs"
+repository = "https://github.com/xen0n/starlark-pyo3"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "python_starlark_rs"
+name = "starlark_pyo3"
 crate-type = ["cdylib"]
 
 [dependencies]

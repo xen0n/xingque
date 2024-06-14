@@ -947,14 +947,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "python-starlark-rs"
-version = "0.1.0"
-dependencies = [
- "pyo3",
- "starlark",
-]
-
-[[package]]
 name = "quote"
 version = "1.0.36"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1236,6 +1228,14 @@ dependencies = [
  "strsim",
  "textwrap",
  "thiserror",
+]
+
+[[package]]
+name = "starlark-pyo3"
+version = "0.1.0"
+dependencies = [
+ "pyo3",
+ "starlark",
 ]
 
 [[package]]
