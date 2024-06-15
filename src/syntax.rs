@@ -9,6 +9,7 @@ use crate::codemap::{PyFileSpan, PySpan};
 use crate::repr_utils::{PyReprBool, PyReprDialectTypes};
 
 #[pyclass(module = "starlark_pyo3", name = "DialectTypes")]
+#[derive(PartialEq, Eq)]
 pub(crate) enum PyDialectTypes {
     #[pyo3(name = "DISABLE")]
     Disable,
@@ -29,6 +30,22 @@ impl PyDialectTypes {
     fn __str__(&self) -> &str {
         self.into()
     }
+
+    fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
+        if let Ok(other) = other.extract::<Self>() {
+            *self == other
+        } else if let Ok(other) = other.extract::<&str>() {
+            if let Ok(other) = other.try_into() {
+                *self == other
+            } else {
+                // conversion from str failed, meaning the value is invalid for
+                // the type
+                false
+            }
+        } else {
+            false
+        }
+    }
 }
 
 impl TryFrom<&str> for PyDialectTypes {
@@ -36,9 +53,9 @@ impl TryFrom<&str> for PyDialectTypes {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
-            "disable" | "Disable" | "DISABLE" => Ok(Self::Disable),
-            "parse-only" | "parse_only" | "ParseOnly" | "PARSE_ONLY" => Ok(Self::ParseOnly),
-            "enable" | "Enable" | "ENABLE" => Ok(Self::Enable),
+            "DISABLE" => Ok(Self::Disable),
+            "PARSE_ONLY" => Ok(Self::ParseOnly),
+            "ENABLE" => Ok(Self::Enable),
             _ => Err("invalid string value of DialectTypes"),
         }
     }

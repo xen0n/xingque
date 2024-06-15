@@ -87,7 +87,9 @@ class Span:
 # starlark::syntax
 
 class DialectTypes:
-    pass
+    DISABLE: DialectTypes
+    PARSE_ONLY: DialectTypes
+    ENABLE: DialectTypes
 
 class Dialect:
     enable_def: bool
