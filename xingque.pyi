@@ -170,14 +170,14 @@ class Dialect:
     enable_f_strings: bool
     def __init__(
         self,
-        enable_def=False,
-        enable_lambda=False,
-        enable_load=False,
-        enable_keyword_only_arguments=False,
-        enable_types=DialectTypes.DISABLE,
-        enable_load_reexport=False,
-        enable_top_level_stmt=False,
-        enable_f_strings=False,
+        enable_def: bool = False,
+        enable_lambda: bool = False,
+        enable_load: bool = False,
+        enable_keyword_only_arguments: bool = False,
+        enable_types: DialectTypes = DialectTypes.DISABLE,
+        enable_load_reexport: bool = False,
+        enable_top_level_stmt: bool = False,
+        enable_f_strings: bool = False,
     ) -> None: ...
     EXTENDED: Dialect
     STANDARD: Dialect
