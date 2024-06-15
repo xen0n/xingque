@@ -1,4 +1,4 @@
-from typing import Self
+from typing import Iterator, Self
 
 # starlark::codemap
 
@@ -83,6 +83,21 @@ class Span:
     def end_span(self) -> Self: ...
     def __contains__(self, pos: Pos | int) -> bool: ...
     def contains(self, pos: Pos | int) -> bool: ...
+
+# starlark::environment
+
+class Globals:
+    def __init__(self) -> None: ...
+    @staticmethod
+    def standard() -> Globals: ...
+    # TODO: extended_by
+    @property
+    def names(self) -> Iterator[str]: ...
+    # TODO: __iter__
+    def describe(self) -> str: ...
+    @property
+    def docstring(self) -> str | None: ...
+    # TODO: documentation
 
 # starlark::syntax
 

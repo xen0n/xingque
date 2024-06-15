@@ -33,7 +33,7 @@ version 0.12.x.
 * [ ] `starlark::docs`
 * [ ] `starlark::environment`
     - [ ] `FrozenModule`
-    - [ ] `Globals`
+    - [x] `Globals` -- partially done
     - [ ] `GlobalsBuilder`
     - [ ] `GlobalsStatic`
     - [ ] `Methods`

@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
 
 mod codemap;
+mod environment;
 mod repr_utils;
 mod syntax;
 
@@ -15,6 +16,7 @@ fn starlark_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<codemap::PyResolvedPos>()?;
     m.add_class::<codemap::PyResolvedSpan>()?;
     m.add_class::<codemap::PySpan>()?;
+    m.add_class::<environment::PyGlobals>()?;
     m.add_class::<syntax::PyAstModule>()?;
     m.add_class::<syntax::PyDialect>()?;
     m.add_class::<syntax::PyDialectTypes>()?;
