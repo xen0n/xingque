@@ -2,6 +2,7 @@ use pyo3::prelude::*;
 
 mod codemap;
 mod environment;
+mod hash_utils;
 mod repr_utils;
 mod syntax;
 mod values;

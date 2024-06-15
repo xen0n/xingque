@@ -1,10 +1,9 @@
-use std::collections::hash_map::DefaultHasher;
-use std::hash::Hasher;
-
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use starlark::environment::{Globals, LibraryExtension};
 use starlark::values::FrozenStringValue;
+
+use crate::hash_utils::TrivialPyHash;
 
 /// The extra library definitions available in this Starlark implementation, but not in the standard.
 #[pyclass(
@@ -98,10 +97,7 @@ impl From<PyLibraryExtension> for LibraryExtension {
 #[pymethods]
 impl PyLibraryExtension {
     fn __hash__(&self) -> u64 {
-        use std::hash::Hash;
-        let mut hasher = DefaultHasher::new();
-        self.hash(&mut hasher);
-        hasher.finish()
+        self.trivial_py_hash()
     }
 
     fn __eq__(&self, other: &Self) -> bool {
