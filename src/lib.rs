@@ -4,6 +4,7 @@ mod codemap;
 mod environment;
 mod repr_utils;
 mod syntax;
+mod values;
 
 /// A Python module implemented in Rust.
 #[pymodule]
@@ -20,5 +21,7 @@ fn starlark_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<syntax::PyAstModule>()?;
     m.add_class::<syntax::PyDialect>()?;
     m.add_class::<syntax::PyDialectTypes>()?;
+    m.add_class::<values::PyHeap>()?;
+    m.add_class::<values::PyHeapSummary>()?;
     Ok(())
 }

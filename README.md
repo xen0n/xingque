@@ -50,6 +50,27 @@ version 0.12.x.
     - [x] `AstModule`
 * [ ] `starlark::typing`
 * [ ] `starlark::values`
+    - [ ] `AggregateHeapProfileInfo`
+    - [ ] `Demand`
+    - [ ] `Freezer`
+    - [ ] `FrozenHeap`
+    - [ ] `FrozenHeapRef`
+    - [ ] `FrozenRef`
+    - [ ] `FrozenValue`
+    - [ ] `FrozenValueTyped`
+    - [x] `Heap` -- partially done
+    - [ ] `OwnedFrozenRef`
+    - [ ] `OwnedFrozenValue`
+    - [ ] `OwnedFrozenValueTyped`
+    - [ ] `StarlarkIterator`
+    - [ ] `StarlarkStrNRepr`
+    - [ ] `Tracer`
+    - [ ] `Value`
+    - [ ] `ValueIdentity`
+    - [ ] `ValueOf`
+    - [ ] `ValueOfUnchecked`
+    - [ ] `ValueTyped`
+    - [ ] `ValueTypedComplex`
 
 ## License
 
