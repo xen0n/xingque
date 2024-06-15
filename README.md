@@ -9,6 +9,48 @@ version 0.12.x.
 
 **NOTE: this project is still under development, do not use in production yet.**
 
+## Work in Progress
+
+* [ ] `starlark::analysis`
+* [ ] `starlark::any`
+* [ ] `starlark::assert`
+* [x] `starlark::codemap` -- majority completed
+    - [x] `CodeMap`
+    - [ ] `CodeMapId`
+    - [x] `FileSpan`
+    - [ ] `FileSpanRef`
+    - [ ] `NativeCodeMap`
+    - [x] `Pos`
+    - [x] `ResolvedFileLine`
+    - [x] `ResolvedFileSpan`
+    - [x] `ResolvedPos`
+    - [x] `ResolvedSpan`
+    - [x] `Span`
+    - [ ] `Spanned`
+* [ ] `starlark::coerce`
+* [ ] `starlark::collections`
+* [ ] `starlark::debug`
+* [ ] `starlark::docs`
+* [ ] `starlark::environment`
+    - [ ] `FrozenModule`
+    - [ ] `Globals`
+    - [ ] `GlobalsBuilder`
+    - [ ] `GlobalsStatic`
+    - [ ] `Methods`
+    - [ ] `MethodsBuilder`
+    - [ ] `MethodsStatic`
+    - [ ] `Module`
+    - [ ] `LibraryExtension`
+* [ ] `starlark::errors`
+* [ ] `starlark::eval`
+* [x] `starlark::syntax`
+    - [x] `DialectTypes`
+    - [x] `Dialect`
+    - [x] `AstLoad`
+    - [x] `AstModule`
+* [ ] `starlark::typing`
+* [ ] `starlark::values`
+
 ## License
 
 Copyright &copy; 2024 WANG Xuerui. All rights reserved.
