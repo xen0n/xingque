@@ -2,86 +2,33 @@ use std::collections::HashMap;
 
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::types::PyString;
 use starlark::syntax::{AstLoad, AstModule, Dialect, DialectTypes};
 
 use crate::codemap::{PyFileSpan, PySpan};
+use crate::hash_utils::TrivialPyHash;
 use crate::repr_utils::{PyReprBool, PyReprDialectTypes};
 
-#[pyclass(module = "xingque", name = "DialectTypes")]
-#[derive(PartialEq, Eq)]
+#[pyclass(
+    module = "xingque",
+    name = "DialectTypes",
+    rename_all = "SCREAMING_SNAKE_CASE",
+    frozen
+)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum PyDialectTypes {
-    #[pyo3(name = "DISABLE")]
     Disable,
-    #[pyo3(name = "PARSE_ONLY")]
     ParseOnly,
-    #[pyo3(name = "ENABLE")]
     Enable,
 }
 
 #[pymethods]
 impl PyDialectTypes {
-    fn __repr__(slf: &Bound<'_, Self>) -> PyResult<String> {
-        let me: &Self = &slf.borrow();
-        let desc: &str = me.into();
-        Ok(format!("DialectTypes.{}", desc))
+    fn __hash__(&self) -> u64 {
+        self.trivial_py_hash()
     }
 
-    fn __str__(&self) -> &str {
-        self.into()
-    }
-
-    fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
-        if let Ok(other) = other.extract::<Self>() {
-            *self == other
-        } else if let Ok(other) = other.extract::<&str>() {
-            if let Ok(other) = other.try_into() {
-                *self == other
-            } else {
-                // conversion from str failed, meaning the value is invalid for
-                // the type
-                false
-            }
-        } else {
-            false
-        }
-    }
-}
-
-impl TryFrom<&str> for PyDialectTypes {
-    type Error = &'static str;
-
-    fn try_from(value: &str) -> Result<Self, Self::Error> {
-        match value {
-            "DISABLE" => Ok(Self::Disable),
-            "PARSE_ONLY" => Ok(Self::ParseOnly),
-            "ENABLE" => Ok(Self::Enable),
-            _ => Err("invalid string value of DialectTypes"),
-        }
-    }
-}
-
-impl From<&PyDialectTypes> for &str {
-    fn from(value: &PyDialectTypes) -> Self {
-        match value {
-            PyDialectTypes::Disable => "DISABLE",
-            PyDialectTypes::ParseOnly => "PARSE_ONLY",
-            PyDialectTypes::Enable => "ENABLE",
-        }
-    }
-}
-
-impl<'py> FromPyObject<'py> for PyDialectTypes {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        let s = ob.downcast::<PyString>()?;
-        s.to_str()?.try_into().map_err(PyValueError::new_err)
-    }
-}
-
-impl ToPyObject for PyDialectTypes {
-    fn to_object(&self, py: Python<'_>) -> PyObject {
-        let x: &str = self.into();
-        x.to_object(py)
+    fn __eq__(&self, other: &Self) -> bool {
+        self == other
     }
 }
 
