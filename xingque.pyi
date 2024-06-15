@@ -1,4 +1,4 @@
-from typing import Iterator, Self
+from typing import Iterable, Iterator, Self
 
 # starlark::codemap
 
@@ -90,7 +90,8 @@ class Globals:
     def __init__(self) -> None: ...
     @staticmethod
     def standard() -> Globals: ...
-    # TODO: extended_by
+    @staticmethod
+    def extended_by(extensions: Iterable[LibraryExtension]) -> Globals: ...
     @property
     def names(self) -> Iterator[str]: ...
     # TODO: __iter__
@@ -98,6 +99,58 @@ class Globals:
     @property
     def docstring(self) -> str | None: ...
     # TODO: documentation
+
+class LibraryExtension:
+    STRUCT_TYPE: LibraryExtension
+    '''Definitions to support the `struct` type, the `struct()` constructor.'''
+
+    RECORD_TYPE: LibraryExtension
+    '''Definitions to support the `record` type, the `record()` constructor and `field()` function.'''
+
+    ENUM_TYPE: LibraryExtension
+    '''Definitions to support the `enum` type, the `enum()` constructor.'''
+
+    MAP: LibraryExtension
+    '''A function `map(f, xs)` which applies `f` to each element of `xs` and returns the result.'''
+
+    FILTER: LibraryExtension
+    '''A function `filter(f, xs)` which applies `f` to each element of `xs` and returns those for which `f` returns `True`.
+    As a special case, `filter(None, xs)` removes all `None` values.
+    '''
+
+    PARTIAL: LibraryExtension
+    '''Partially apply a function, `partial(f, *args, **kwargs)` will create a function where those `args` `kwargs`
+    are already applied to `f`.
+    '''
+
+    DEBUG: LibraryExtension
+    '''Add a function `debug(x)` which shows the Rust `Debug` representation of a value.
+    Useful when debugging, but the output should not be considered stable.
+    '''
+
+    PRINT: LibraryExtension
+    '''Add a function `print(x)` which prints to stderr.'''
+
+    PPRINT: LibraryExtension
+    '''Add a function `pprint(x)` which pretty-prints to stderr.'''
+
+    BREAKPOINT: LibraryExtension
+    '''Add a function `breakpoint()` which will drop into a console-module evaluation prompt.'''
+
+    JSON: LibraryExtension
+    '''Add a function `json()` which will generate JSON for a module.'''
+
+    TYPING: LibraryExtension
+    '''Provides `typing.All`, `typing.Callable` etc.
+    Usually used in conjunction with `Dialect.enable_types`.'''
+
+    INTERNAL: LibraryExtension
+    '''Utilities exposing starlark-rust internals.
+    These are not for production use.'''
+
+    CALL_STACK: LibraryExtension
+    '''Add a function `call_stack()` which returns a string representation of
+    the current call stack.'''
 
 # starlark::syntax
 
