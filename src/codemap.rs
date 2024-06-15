@@ -3,7 +3,7 @@ use starlark::codemap::{
     CodeMap, FileSpan, Pos, ResolvedFileLine, ResolvedFileSpan, ResolvedPos, ResolvedSpan, Span,
 };
 
-#[pyclass(module = "starlark_pyo3", name = "Pos")]
+#[pyclass(module = "xingque", name = "Pos")]
 pub(crate) struct PyPos(Pos);
 
 #[pymethods]
@@ -51,7 +51,7 @@ impl<'py> FromPyObject<'py> for PyPos {
     }
 }
 
-#[pyclass(module = "starlark_pyo3", name = "ResolvedPos")]
+#[pyclass(module = "xingque", name = "ResolvedPos")]
 pub(crate) struct PyResolvedPos(ResolvedPos);
 
 impl From<ResolvedPos> for PyResolvedPos {
@@ -102,7 +102,7 @@ impl PyResolvedPos {
     }
 }
 
-#[pyclass(module = "starlark_pyo3", name = "ResolvedSpan")]
+#[pyclass(module = "xingque", name = "ResolvedSpan")]
 pub(crate) struct PyResolvedSpan(ResolvedSpan);
 
 impl From<ResolvedSpan> for PyResolvedSpan {
@@ -168,7 +168,7 @@ impl PyResolvedSpan {
     }
 }
 
-#[pyclass(module = "starlark_pyo3", name = "Span")]
+#[pyclass(module = "xingque", name = "Span")]
 pub(crate) struct PySpan(pub(crate) Span);
 
 impl From<Span> for PySpan {
@@ -242,7 +242,7 @@ impl PySpan {
     }
 }
 
-#[pyclass(module = "starlark_pyo3", name = "CodeMap")]
+#[pyclass(module = "xingque", name = "CodeMap")]
 pub(crate) struct PyCodeMap(CodeMap);
 
 impl From<CodeMap> for PyCodeMap {
@@ -316,7 +316,7 @@ impl PyCodeMap {
     }
 }
 
-#[pyclass(module = "starlark_pyo3", name = "FileSpan")]
+#[pyclass(module = "xingque", name = "FileSpan")]
 #[derive(Clone)]
 pub(crate) struct PyFileSpan(FileSpan);
 
@@ -362,7 +362,7 @@ impl PyFileSpan {
     }
 }
 
-#[pyclass(module = "starlark_pyo3", name = "ResolvedFileLine")]
+#[pyclass(module = "xingque", name = "ResolvedFileLine")]
 pub(crate) struct PyResolvedFileLine(ResolvedFileLine);
 
 impl From<ResolvedFileLine> for PyResolvedFileLine {
@@ -415,7 +415,7 @@ impl PyResolvedFileLine {
     }
 }
 
-#[pyclass(module = "starlark_pyo3", name = "ResolvedFileSpan")]
+#[pyclass(module = "xingque", name = "ResolvedFileSpan")]
 pub(crate) struct PyResolvedFileSpan(ResolvedFileSpan);
 
 impl From<ResolvedFileSpan> for PyResolvedFileSpan {

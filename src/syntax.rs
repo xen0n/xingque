@@ -8,7 +8,7 @@ use starlark::syntax::{AstLoad, AstModule, Dialect, DialectTypes};
 use crate::codemap::{PyFileSpan, PySpan};
 use crate::repr_utils::{PyReprBool, PyReprDialectTypes};
 
-#[pyclass(module = "starlark_pyo3", name = "DialectTypes")]
+#[pyclass(module = "xingque", name = "DialectTypes")]
 #[derive(PartialEq, Eq)]
 pub(crate) enum PyDialectTypes {
     #[pyo3(name = "DISABLE")]
@@ -105,7 +105,7 @@ impl From<DialectTypes> for PyDialectTypes {
     }
 }
 
-#[pyclass(module = "starlark_pyo3", name = "Dialect")]
+#[pyclass(module = "xingque", name = "Dialect")]
 pub(crate) struct PyDialect(Dialect);
 
 macro_rules! trivial_bool_prop {
@@ -229,7 +229,7 @@ impl From<Dialect> for PyDialect {
     }
 }
 
-#[pyclass(module = "starlark_pyo3", name = "AstModule")]
+#[pyclass(module = "xingque", name = "AstModule")]
 pub(crate) struct PyAstModule(AstModule);
 
 impl From<AstModule> for PyAstModule {
@@ -281,7 +281,7 @@ impl PyAstModule {
     }
 }
 
-#[pyclass(module = "starlark_pyo3", name = "AstLoad")]
+#[pyclass(module = "xingque", name = "AstLoad")]
 pub(crate) struct PyAstLoad {
     /// Span where this load is written
     #[pyo3(get)]

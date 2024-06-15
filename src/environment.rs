@@ -2,7 +2,7 @@ use pyo3::prelude::*;
 use starlark::environment::Globals;
 use starlark::values::FrozenStringValue;
 
-#[pyclass(module = "starlark_pyo3", name = "Globals")]
+#[pyclass(module = "xingque", name = "Globals")]
 pub(crate) struct PyGlobals(Globals);
 
 impl From<Globals> for PyGlobals {
@@ -48,7 +48,7 @@ impl PyGlobals {
 }
 
 // TODO: is the unsendable marker removable?
-#[pyclass(module = "starlark_pyo3", name = "_GlobalsNamesIterator", unsendable)]
+#[pyclass(module = "xingque", name = "_GlobalsNamesIterator", unsendable)]
 pub(crate) struct PyGlobalsNamesIterator {
     _parent: Py<PyGlobals>,
     inner: Box<dyn Iterator<Item = FrozenStringValue>>,

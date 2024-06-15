@@ -4,7 +4,7 @@ use pyo3::{prelude::*, types::PyTuple};
 use starlark::values::Heap;
 
 /// Information about the data stored on a heap.
-#[pyclass(module = "starlark_pyo3", name = "HeapSummary")]
+#[pyclass(module = "xingque", name = "HeapSummary")]
 pub(crate) struct PyHeapSummary(HashMap<String, (usize, usize)>);
 
 impl From<HashMap<String, (usize, usize)>> for PyHeapSummary {
@@ -33,7 +33,7 @@ impl PyHeapSummary {
 }
 
 /// A heap on which `Value`s can be allocated.
-#[pyclass(module = "starlark_pyo3", name = "Heap")]
+#[pyclass(module = "xingque", name = "Heap")]
 pub(crate) struct PyHeap(Heap);
 
 impl From<Heap> for PyHeap {

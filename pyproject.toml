@@ -3,7 +3,7 @@ requires = ["maturin>=1.6,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "starlark-pyo3"
+name = "xingque"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",
@@ -12,6 +12,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 dynamic = ["version"]
+
 [tool.maturin]
 features = ["pyo3/extension-module"]
 

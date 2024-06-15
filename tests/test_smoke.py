@@ -1,4 +1,4 @@
 def test_import():
-    import starlark_pyo3
+    import xingque
 
-    assert starlark_pyo3 is not None
+    assert xingque is not None

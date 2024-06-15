@@ -1,10 +1,10 @@
-import starlark_pyo3
+import xingque
 
 
 def test_pos():
-    a = starlark_pyo3.Pos(233)
-    b = starlark_pyo3.Pos(233)
-    c = starlark_pyo3.Pos(234)
+    a = xingque.Pos(233)
+    b = xingque.Pos(233)
+    c = xingque.Pos(234)
     assert a.get() == 233
     assert int(a) == 233
     assert a == 233

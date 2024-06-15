@@ -1,9 +1,24 @@
-# starlark-pyo3
+# 星雀 `xingque`
 
-A Python binding to [`starlark-rs`][starlark-rs], exposing the [Starlark]
-language to your Python projects. The current version wraps `starlark-rs`
-version 0.12.x.
+Yet another Python binding to [`starlark-rs`][starlark-rs], exposing the
+[Starlark] language to your Python projects. The current version wraps
+`starlark-rs` version 0.12.x.
 
+The project's name is a [calque] of "Starlark" into Chinese. It is
+pronounced *xīng què* (in Standard Pinyin) or *Hsing-ch'üeh* (in Wade-Giles).
+
+<details>
+<summary>The reason behind the curious name</summary>
+
+I had to come up with another name for the project after discovering
+[an identically named project][starlark-pyo3] after I first renamed the
+project `starlark-pyo3` from `python-starlark-rs`, and that the probably
+next-best alternative `pystarlark` was also taken long ago.
+
+</details>
+
+[calque]: https://en.wikipedia.org/wiki/Calque
+[starlark-pyo3]: https://github.com/inducer/starlark-pyo3
 [starlark-rs]: https://github.com/facebook/starlark-rust
 [Starlark]: https://github.com/bazelbuild/starlark
 
@@ -76,6 +91,6 @@ version 0.12.x.
 
 Copyright &copy; 2024 WANG Xuerui. All rights reserved.
 
-`starlark-pyo3` is licensed under either the
+`xingque` is licensed under either the
 [Apache 2.0 license](./LICENSE.Apache-2.0) or the
 [MIT license](./LICENSE.MIT).

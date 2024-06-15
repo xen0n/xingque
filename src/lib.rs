@@ -6,9 +6,8 @@ mod repr_utils;
 mod syntax;
 mod values;
 
-/// A Python module implemented in Rust.
 #[pymodule]
-fn starlark_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn xingque(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<codemap::PyCodeMap>()?;
     m.add_class::<codemap::PyFileSpan>()?;
     m.add_class::<codemap::PyPos>()?;
