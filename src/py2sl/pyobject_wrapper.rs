@@ -169,4 +169,14 @@ impl<'v> StarlarkValue<'v> for SlPyObjectWrapper {
 
         result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
     }
+
+    fn length(&self) -> starlark::Result<i32> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            match inner.len() {
+                Ok(len) => Ok(len as i32),
+                Err(e) => Err(starlark::Error::new(starlark::ErrorKind::Value(e.into()))),
+            }
+        })
+    }
 }
