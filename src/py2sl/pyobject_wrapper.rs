@@ -179,4 +179,14 @@ impl<'v> StarlarkValue<'v> for SlPyObjectWrapper {
             }
         })
     }
+
+    fn is_in(&self, other: Value<'v>) -> starlark::Result<bool> {
+        let result = Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let other = py_from_sl_value(py, other)?;
+            inner.contains(other)
+        });
+
+        result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+    }
 }
