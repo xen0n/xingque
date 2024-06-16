@@ -1,3 +1,4 @@
+use core::cmp::Ordering;
 use std::hash::Hasher;
 
 use allocative::Allocative;
@@ -107,6 +108,16 @@ impl<'v> StarlarkValue<'v> for SlPyObjectWrapper {
             let inner = self.0.bind(py);
             let other = py_from_sl_value(py, other)?;
             inner.eq(other)
+        });
+
+        result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+    }
+
+    fn compare(&self, other: Value<'v>) -> starlark::Result<Ordering> {
+        let result: PyResult<Ordering> = Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let other = py_from_sl_value(py, other)?;
+            inner.compare(other)
         });
 
         result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
