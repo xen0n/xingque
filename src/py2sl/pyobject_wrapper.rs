@@ -2,10 +2,7 @@ use core::cmp::Ordering;
 use std::hash::Hasher;
 
 use allocative::Allocative;
-use num_bigint::BigInt;
-use pyo3::exceptions::PyNotImplementedError;
 use pyo3::exceptions::PyRuntimeError;
-use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use pyo3::types::PyTuple;
@@ -68,44 +65,22 @@ impl<'v> StarlarkValue<'v> for SlPyObjectWrapper {
     fn to_bool(&self) -> bool {
         let result: PyResult<bool> = Python::with_gil(|py| {
             let inner = self.0.bind(py);
-            let meth = intern!(py, "__bool__");
-            if inner.hasattr(meth)? {
-                inner.call_method0(meth)?.extract::<bool>()
-            } else {
-                Ok(true)
-            }
+            inner.is_truthy()
         });
         result.unwrap_or(true)
     }
 
     fn write_hash(&self, hasher: &mut StarlarkHasher) -> starlark::Result<()> {
-        let result: PyResult<()> = Python::with_gil(|py| {
+        Python::with_gil(|py| {
             let inner = self.0.bind(py);
-            let meth = intern!(py, "__hash__");
-            if inner.hasattr(meth)? {
-                let hash_value = inner.call_method0(meth)?;
-                if let Ok(val) = hash_value.extract::<u64>() {
-                    hasher.write_u64(val);
-                    return Ok(());
+            match inner.hash() {
+                Ok(hash) => {
+                    hasher.write_isize(hash);
+                    Ok(())
                 }
-                if let Ok(val) = hash_value.extract::<BigInt>() {
-                    for limb in val.iter_u64_digits() {
-                        hasher.write_u64(limb);
-                    }
-                    return Ok(());
-                }
+                Err(e) => Err(starlark::Error::new(starlark::ErrorKind::Value(e.into()))),
             }
-
-            // no __hash__ or its return value isn't an int
-            Err(PyNotImplementedError::new_err(
-                "the wrapped object seems un-hashable",
-            ))
-        });
-
-        match result {
-            Ok(_) => Ok(()),
-            Err(e) => Err(starlark::Error::new(starlark::ErrorKind::Value(e.into()))),
-        }
+        })
     }
 
     fn equals(&self, other: Value<'v>) -> starlark::Result<bool> {
