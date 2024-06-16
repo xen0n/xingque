@@ -2,11 +2,11 @@ use allocative::Allocative;
 use pyo3::prelude::*;
 use starlark::any::ProvidesStaticType;
 use starlark::values::{
-    starlark_value, AllocFrozenValue, AllocValue, FrozenHeap, FrozenValue, Heap, NoSerialize,
-    StarlarkValue, Value,
+    starlark_value, AllocFrozenValue, AllocValue, Freeze, Freezer, FrozenHeap,
+    FrozenValue, Heap, NoSerialize, StarlarkValue, Trace, Value,
 };
 
-#[derive(NoSerialize, ProvidesStaticType, Allocative)]
+#[derive(Trace, NoSerialize, ProvidesStaticType, Allocative)]
 pub(crate) struct SlPyObjectWrapper(#[allocative(skip)] pub(crate) PyObject);
 
 impl From<PyObject> for SlPyObjectWrapper {
@@ -36,6 +36,14 @@ impl ::core::fmt::Debug for SlPyObjectWrapper {
 impl ::std::fmt::Display for SlPyObjectWrapper {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         ::std::fmt::Display::fmt(&self.0, f)
+    }
+}
+
+impl Freeze for SlPyObjectWrapper {
+    type Frozen = SlPyObjectWrapper;
+
+    fn freeze(self, _freezer: &Freezer) -> anyhow::Result<Self::Frozen> {
+        Ok(self)
     }
 }
 

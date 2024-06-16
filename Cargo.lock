@@ -1660,6 +1660,7 @@ name = "xingque"
 version = "0.1.0"
 dependencies = [
  "allocative",
+ "anyhow",
  "num-bigint",
  "pyo3",
  "starlark",
