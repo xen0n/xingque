@@ -893,6 +893,7 @@ dependencies = [
  "inventory",
  "libc",
  "memoffset 0.9.1",
+ "num-bigint",
  "parking_lot",
  "portable-atomic",
  "pyo3-build-config",
@@ -1658,6 +1659,8 @@ checksum = "1e9df38ee2d2c3c5948ea468a8406ff0db0b29ae1ffde1bcf20ef305bcc95c51"
 name = "xingque"
 version = "0.1.0"
 dependencies = [
+ "allocative",
+ "num-bigint",
  "pyo3",
  "starlark",
 ]

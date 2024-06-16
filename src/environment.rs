@@ -1,9 +1,10 @@
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
-use starlark::environment::{Globals, LibraryExtension};
+use starlark::environment::{Globals, GlobalsBuilder, LibraryExtension};
 use starlark::values::FrozenStringValue;
 
 use crate::hash_utils::TrivialPyHash;
+use crate::py2sl::sl_frozen_value_from_py;
 
 /// The extra library definitions available in this Starlark implementation, but not in the standard.
 #[pyclass(
@@ -195,5 +196,197 @@ impl PyGlobalsNamesIterator {
 
     fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<&str> {
         slf.inner.next().map(|x| x.as_str())
+    }
+}
+
+#[pyclass(module = "xingque", name = "GlobalsBuilder")]
+pub(crate) struct PyGlobalsBuilder(Option<GlobalsBuilder>);
+
+impl From<GlobalsBuilder> for PyGlobalsBuilder {
+    fn from(value: GlobalsBuilder) -> Self {
+        Self(Some(value))
+    }
+}
+
+#[pymethods]
+impl PyGlobalsBuilder {
+    #[new]
+    fn new() -> Self {
+        GlobalsBuilder::new().into()
+    }
+
+    #[staticmethod]
+    fn standard() -> Self {
+        GlobalsBuilder::standard().into()
+    }
+
+    #[staticmethod]
+    fn extended_by(extensions: &Bound<'_, PyAny>) -> PyResult<Self> {
+        let extensions = {
+            let mut tmp = Vec::new();
+            for x in extensions.iter()? {
+                match x {
+                    Ok(x) => match x.extract::<PyLibraryExtension>() {
+                        Ok(x) => tmp.push(x.into()),
+                        Err(e) => return Err(PyValueError::new_err(e)),
+                    },
+                    Err(e) => return Err(PyValueError::new_err(e)),
+                }
+            }
+            tmp
+        };
+        Ok(GlobalsBuilder::extended_by(&extensions).into())
+    }
+
+    fn r#struct(&mut self, name: &str, f: &Bound<'_, PyAny>) -> PyResult<()> {
+        let inner = match &mut self.0 {
+            Some(inner) => inner,
+            None => {
+                return Err(PyRuntimeError::new_err(
+                    "this GlobalsBuilder has already been consumed",
+                ))
+            }
+        };
+
+        let mut err = None;
+        inner.struct_(name, |gb| {
+            let args = (PySubGlobalsBuilder::new(gb),);
+            err = f.call1(args).err();
+        });
+        match err {
+            Some(e) => Err(e),
+            None => Ok(()),
+        }
+    }
+
+    fn with_<'py>(
+        slf: &'py Bound<'py, Self>,
+        f: &'py Bound<'py, PyAny>,
+    ) -> PyResult<&'py Bound<'py, Self>> {
+        // implement the logic ourselves to avoid having to do ownership dance
+        // it's basically just f(self) and return self
+        let mut me = slf.borrow_mut();
+        let inner = match &mut me.0 {
+            Some(inner) => inner,
+            None => {
+                return Err(PyRuntimeError::new_err(
+                    "this GlobalsBuilder has already been consumed",
+                ))
+            }
+        };
+
+        let args = (PySubGlobalsBuilder::new(inner),);
+        let err = f.call1(args).err();
+        match err {
+            Some(e) => Err(e),
+            None => Ok(slf),
+        }
+    }
+
+    fn with_struct<'py>(
+        slf: &'py Bound<'py, Self>,
+        name: &str,
+        f: &'py Bound<'py, PyAny>,
+    ) -> PyResult<&'py Bound<'py, Self>> {
+        // implement the logic ourselves to avoid having to do ownership dance
+        // it's basically just self.struct_(name, f) and return self
+        slf.borrow_mut().r#struct(name, f).map(|_| slf)
+    }
+
+    fn build(&mut self) -> PyResult<PyGlobals> {
+        let inner = match self.0.take() {
+            Some(inner) => inner,
+            None => {
+                return Err(PyRuntimeError::new_err(
+                    "this GlobalsBuilder has already been consumed",
+                ))
+            }
+        };
+        Ok(inner.build().into())
+    }
+
+    fn set(&mut self, name: &str, value: &Bound<'_, PyAny>) -> PyResult<()> {
+        let inner = match &mut self.0 {
+            Some(inner) => inner,
+            None => {
+                return Err(PyRuntimeError::new_err(
+                    "this GlobalsBuilder has already been consumed",
+                ))
+            }
+        };
+        let heap = inner.frozen_heap();
+
+        inner.set(name, sl_frozen_value_from_py(value, heap));
+        Ok(())
+    }
+
+    // TODO: set_function
+
+    // TODO: are those necessary?
+    //
+    // * frozen_heap
+    // * alloc
+    // * set_docstring
+}
+
+// necessary for proper ownership maintenance
+#[pyclass(module = "xingque", name = "_SubGlobalsBuilder", unsendable)]
+pub(crate) struct PySubGlobalsBuilder(&'static mut GlobalsBuilder);
+
+impl PySubGlobalsBuilder {
+    fn new(ptr: &mut GlobalsBuilder) -> Self {
+        // Safety TODO
+        let ptr: &'static mut GlobalsBuilder = unsafe { ::core::mem::transmute(ptr) };
+        Self(ptr)
+    }
+}
+
+#[pymethods]
+impl PySubGlobalsBuilder {
+    fn r#struct(&mut self, name: &str, f: &Bound<'_, PyAny>) -> PyResult<()> {
+        let mut err = None;
+        self.0.struct_(name, |gb| {
+            let args = (PySubGlobalsBuilder::new(gb),);
+            err = f.call1(args).err();
+        });
+        match err {
+            Some(e) => Err(e),
+            None => Ok(()),
+        }
+    }
+
+    fn with_<'py>(
+        slf: &'py Bound<'py, Self>,
+        f: &'py Bound<'py, PyAny>,
+    ) -> PyResult<&'py Bound<'py, Self>> {
+        // implement the logic ourselves to avoid having to do ownership dance
+        // it's basically just f(self) and return self
+        let mut me = slf.borrow_mut();
+
+        let args = (PySubGlobalsBuilder::new(me.0),);
+        let err = f.call1(args).err();
+        match err {
+            Some(e) => Err(e),
+            None => Ok(slf),
+        }
+    }
+
+    fn with_struct<'py>(
+        slf: &'py Bound<'py, Self>,
+        name: &str,
+        f: &'py Bound<'py, PyAny>,
+    ) -> PyResult<&'py Bound<'py, Self>> {
+        // implement the logic ourselves to avoid having to do ownership dance
+        // it's basically just self.struct_(name, f) and return self
+        slf.borrow_mut().r#struct(name, f).map(|_| slf)
+    }
+
+    // no build() because it needs to take ownership which is not what we want
+    // to allow for a nested builder
+
+    fn set(&mut self, name: &str, value: &Bound<'_, PyAny>) -> PyResult<()> {
+        let heap = self.0.frozen_heap();
+        self.0.set(name, sl_frozen_value_from_py(value, heap));
+        Ok(())
     }
 }

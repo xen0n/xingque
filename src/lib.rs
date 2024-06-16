@@ -3,6 +3,7 @@ use pyo3::prelude::*;
 mod codemap;
 mod environment;
 mod hash_utils;
+mod py2sl;
 mod repr_utils;
 mod syntax;
 mod values;
@@ -18,6 +19,7 @@ fn xingque(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<codemap::PyResolvedSpan>()?;
     m.add_class::<codemap::PySpan>()?;
     m.add_class::<environment::PyGlobals>()?;
+    m.add_class::<environment::PyGlobalsBuilder>()?;
     m.add_class::<environment::PyLibraryExtension>()?;
     m.add_class::<syntax::PyAstModule>()?;
     m.add_class::<syntax::PyDialect>()?;
