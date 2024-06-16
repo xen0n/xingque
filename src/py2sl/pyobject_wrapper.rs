@@ -189,4 +189,18 @@ impl<'v> StarlarkValue<'v> for SlPyObjectWrapper {
 
         result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
     }
+
+    // TODO: plus/minus only wrappable after
+    // https://github.com/PyO3/pyo3/commit/37a5f6a94e9dab31575b016a4295fb94322b9aba
+    // gets shipped in a published tag
+    /*
+    fn plus(&self, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        let result = Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            inner.pos()
+        });
+
+        result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+    }
+    */
 }
