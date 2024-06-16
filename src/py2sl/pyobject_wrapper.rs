@@ -4,15 +4,20 @@ use std::hash::Hasher;
 use allocative::Allocative;
 use num_bigint::BigInt;
 use pyo3::exceptions::PyNotImplementedError;
+use pyo3::exceptions::PyRuntimeError;
 use pyo3::intern;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
+use pyo3::types::PyTuple;
 use starlark::any::ProvidesStaticType;
 use starlark::collections::StarlarkHasher;
+use starlark::eval::{Arguments, Evaluator};
 use starlark::values::{
     starlark_value, AllocFrozenValue, AllocValue, Freeze, Freezer, FrozenHeap, FrozenValue, Heap,
     NoSerialize, StarlarkValue, Trace, Value,
 };
 
+use crate::py2sl::sl_value_from_py;
 use crate::sl2py::py_from_sl_value;
 
 #[derive(Trace, NoSerialize, ProvidesStaticType, Allocative)]
@@ -118,6 +123,73 @@ impl<'v> StarlarkValue<'v> for SlPyObjectWrapper {
             let inner = self.0.bind(py);
             let other = py_from_sl_value(py, other)?;
             inner.compare(other)
+        });
+
+        result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+    }
+
+    fn invoke(
+        &self,
+        _me: Value<'v>,
+        args: &Arguments<'v, '_>,
+        eval: &mut Evaluator<'v, '_>,
+    ) -> starlark::Result<Value<'v>> {
+        let heap = eval.heap();
+        let result: PyResult<Value<'v>> = Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+
+            let py_args = {
+                let mut result = Vec::new();
+                match args.positions(heap) {
+                    Ok(sl_args) => {
+                        for sl in sl_args {
+                            result.push(py_from_sl_value(py, sl)?);
+                        }
+                    }
+                    Err(e) => {
+                        return Err(PyRuntimeError::new_err(format!(
+                            "failed to unpack Starlark positional args: {}",
+                            e.to_string()
+                        )));
+                    }
+                }
+                PyTuple::new_bound(py, result)
+            };
+
+            let py_kwargs = match args.names_map() {
+                Ok(sl_kwargs) => {
+                    if sl_kwargs.len() == 0 {
+                        None
+                    } else {
+                        let result = PyDict::new_bound(py);
+                        for (k, v) in sl_kwargs {
+                            let k = k.as_str();
+                            match py_from_sl_value(py, v) {
+                                Ok(v) => {
+                                    if let Err(e) = result.set_item(k, v) {
+                                        return Err(e);
+                                    }
+                                }
+                                Err(e) => {
+                                    return Err(e);
+                                }
+                            }
+                        }
+                        Some(result)
+                    }
+                }
+
+                Err(e) => {
+                    return Err(PyRuntimeError::new_err(format!(
+                        "failed to unpack Starlark keyword args: {}",
+                        e.to_string()
+                    )));
+                }
+            };
+
+            inner
+                .call(py_args, py_kwargs.as_ref())
+                .map(|v| sl_value_from_py(&v, heap))
         });
 
         result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
