@@ -5,6 +5,7 @@ mod environment;
 mod hash_utils;
 mod py2sl;
 mod repr_utils;
+mod sl2py;
 mod syntax;
 mod values;
 

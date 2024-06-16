@@ -7,7 +7,7 @@ use starlark::values::{
 };
 
 #[derive(NoSerialize, ProvidesStaticType, Allocative)]
-pub(crate) struct SlPyObjectWrapper(#[allocative(skip)] PyObject);
+pub(crate) struct SlPyObjectWrapper(#[allocative(skip)] pub(crate) PyObject);
 
 impl From<PyObject> for SlPyObjectWrapper {
     fn from(value: PyObject) -> Self {

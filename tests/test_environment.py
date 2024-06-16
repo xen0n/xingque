@@ -36,15 +36,33 @@ def test_globals_builder():
         pass
 
     gb = xingque.GlobalsBuilder()
-    gb.set("foo0", None)
-    gb.set("foo1", True)
-    gb.set("foo2", 233)
-    gb.set("foo3", 1234567890123456789012345678901234567890)
-    gb.set("foo4", 3.14)
-    gb.set("foo5", "bar")
-    gb.set("foo6", [None, 123, "quux", {1: 2, "aa": None}])
-    gb.set("foo7", {"a": [123, 456], "b": False, 233: 234})
-    gb.set("foo8", Opaque())
+    opaque = Opaque()
+    kv = {
+        "foo0": None,
+        "foo1": False,
+        "foo2": True,
+        "foo3": 233,
+        "foo4": -233,
+        "foo5": 0x80000000,
+        "foo6": -0x100000000,
+        "foo7": 1234567890123456789012345678901234567890,
+        "foo8": 3.14,
+        "foo9": "bar",
+        "foo10": [None, 123, "quux", {1: 2, "aa": None, "l": [False, 0.1, opaque]}],
+        "foo11": {"a": [123, 1 << 100], "b": False, 233: 234, None: {1: 2, 3: ""}},
+        "foo12": opaque,
+        "foo13": ...,
+    }
+    for k, v in kv.items():
+        gb.set(k, v)
     g = gb.build()
+
     list_of_names = set(g.names)
-    assert len(list_of_names) == 9
+    assert len(list_of_names) == 14
+
+    for k, v in g:
+        assert type(k) is str
+        assert k in kv
+        assert v == kv[k]
+        if k in {"foo12", "foo13"}:
+            assert v is kv[k]

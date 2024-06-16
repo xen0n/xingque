@@ -1,10 +1,11 @@
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 use starlark::environment::{Globals, GlobalsBuilder, LibraryExtension};
-use starlark::values::FrozenStringValue;
+use starlark::values::{FrozenStringValue, FrozenValue};
 
 use crate::hash_utils::TrivialPyHash;
 use crate::py2sl::sl_frozen_value_from_py;
+use crate::sl2py::py_from_sl_frozen_value;
 
 /// The extra library definitions available in this Starlark implementation, but not in the standard.
 #[pyclass(
@@ -153,7 +154,12 @@ impl PyGlobals {
         )
     }
 
-    // TODO: iter
+    fn __iter__(slf: &Bound<'_, Self>) -> PyResult<Py<PyGlobalsItemsIterator>> {
+        Py::new(
+            slf.py(),
+            PyGlobalsItemsIterator::new(slf, Box::new(slf.borrow().0.iter())),
+        )
+    }
 
     fn describe(&self) -> String {
         self.0.describe()
@@ -196,6 +202,45 @@ impl PyGlobalsNamesIterator {
 
     fn __next__(mut slf: PyRefMut<'_, Self>) -> Option<&str> {
         slf.inner.next().map(|x| x.as_str())
+    }
+}
+
+// TODO: is the unsendable marker removable?
+#[pyclass(module = "xingque", name = "_GlobalsItemsIterator", unsendable)]
+pub(crate) struct PyGlobalsItemsIterator {
+    _parent: Py<PyGlobals>,
+    inner: Box<dyn Iterator<Item = (&'static str, FrozenValue)>>,
+}
+
+impl PyGlobalsItemsIterator {
+    fn new(
+        parent: &Bound<'_, PyGlobals>,
+        value: Box<dyn Iterator<Item = (&str, FrozenValue)> + '_>,
+    ) -> Self {
+        let parent = parent.clone().unbind();
+        Self {
+            _parent: parent,
+            // Safety: parent is kept alive by the reference above
+            inner: unsafe { ::core::mem::transmute(value) },
+        }
+    }
+}
+
+#[pymethods]
+impl PyGlobalsItemsIterator {
+    fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
+        slf
+    }
+
+    fn __next__(mut slf: PyRefMut<'_, Self>) -> PyResult<Option<(&str, PyObject)>> {
+        let py = slf.py();
+        match slf.inner.next() {
+            None => Ok(None),
+            Some((k, v)) => {
+                let v = py_from_sl_frozen_value(py, v)?;
+                Ok(Some((k, v)))
+            }
+        }
     }
 }
 

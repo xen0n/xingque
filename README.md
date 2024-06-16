@@ -48,8 +48,8 @@ next-best alternative `pystarlark` was also taken long ago.
 * [ ] `starlark::docs`
 * [ ] `starlark::environment`
     - [ ] `FrozenModule`
-    - [x] `Globals` -- partially done
-    - [ ] `GlobalsBuilder`
+    - [x] `Globals` -- mostly done
+    - [x] `GlobalsBuilder` -- mostly done
     - [ ] `GlobalsStatic`
     - [ ] `Methods`
     - [ ] `MethodsBuilder`

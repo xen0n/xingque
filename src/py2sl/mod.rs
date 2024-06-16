@@ -5,7 +5,7 @@ use starlark::values::list::AllocList;
 use starlark::values::tuple::AllocTuple;
 use starlark::values::{FrozenHeap, FrozenValue};
 
-mod pyobject_wrapper;
+pub(crate) mod pyobject_wrapper;
 
 pub(crate) fn sl_frozen_value_from_py(value: &Bound<'_, PyAny>, heap: &FrozenHeap) -> FrozenValue {
     if value.is_none() {
@@ -20,10 +20,10 @@ pub(crate) fn sl_frozen_value_from_py(value: &Bound<'_, PyAny>, heap: &FrozenHea
     if let Ok(x) = value.extract::<u64>() {
         return heap.alloc(x);
     }
-    if let Ok(x) = value.extract::<f64>() {
+    if let Ok(x) = value.extract::<num_bigint::BigInt>() {
         return heap.alloc(x);
     }
-    if let Ok(x) = value.extract::<num_bigint::BigInt>() {
+    if let Ok(x) = value.extract::<f64>() {
         return heap.alloc(x);
     }
     if let Ok(x) = value.extract::<&str>() {
