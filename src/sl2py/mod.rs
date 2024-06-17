@@ -3,11 +3,15 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyList, PyTuple};
 use starlark::values::dict::{DictRef, FrozenDictRef};
 use starlark::values::float::StarlarkFloat;
+use starlark::values::function::NativeFunction;
 use starlark::values::list::ListRef;
 use starlark::values::tuple::{FrozenTupleRef, TupleRef};
 use starlark::values::{FrozenValue, UnpackValue, Value, ValueLike};
 
 use crate::py2sl::SlPyObject;
+
+mod native_function;
+use native_function::PySlNativeFunction;
 
 pub(crate) fn py_from_sl_frozen_value(py: Python<'_>, sl: FrozenValue) -> PyResult<PyObject> {
     if sl.is_none() {
@@ -42,6 +46,8 @@ pub(crate) fn py_from_sl_frozen_value(py: Python<'_>, sl: FrozenValue) -> PyResu
             result.set_item(k, v)?;
         }
         Ok(result.as_any().clone().unbind())
+    } else if let Some(x) = sl.downcast_frozen_ref::<NativeFunction>() {
+        PySlNativeFunction::new_py_any(py, x.as_ref())
     } else if let Some(x) = sl.downcast_frozen_ref::<SlPyObject>() {
         Ok(x.0.clone_ref(py))
     } else {
@@ -83,6 +89,8 @@ pub(crate) fn py_from_sl_value(py: Python<'_>, sl: Value<'_>) -> PyResult<PyObje
             result.set_item(k, v)?;
         }
         Ok(result.as_any().clone().unbind())
+    } else if let Some(x) = sl.downcast_ref::<NativeFunction>() {
+        PySlNativeFunction::new_py_any(py, x)
     } else if let Some(x) = sl.downcast_ref::<SlPyObject>() {
         Ok(x.0.clone_ref(py))
     } else {
