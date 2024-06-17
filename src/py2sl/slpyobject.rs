@@ -18,40 +18,40 @@ use crate::py2sl::sl_value_from_py;
 use crate::sl2py::py_from_sl_value;
 
 #[derive(Trace, NoSerialize, ProvidesStaticType, Allocative)]
-pub(crate) struct SlPyObjectWrapper(#[allocative(skip)] pub(crate) PyObject);
+pub(crate) struct SlPyObject(#[allocative(skip)] pub(crate) PyObject);
 
-impl From<PyObject> for SlPyObjectWrapper {
+impl From<PyObject> for SlPyObject {
     fn from(value: PyObject) -> Self {
         Self(value)
     }
 }
 
-impl<'v> AllocValue<'v> for SlPyObjectWrapper {
+impl<'v> AllocValue<'v> for SlPyObject {
     fn alloc_value(self, heap: &'v Heap) -> Value<'v> {
         heap.alloc_simple(self)
     }
 }
 
-impl AllocFrozenValue for SlPyObjectWrapper {
+impl AllocFrozenValue for SlPyObject {
     fn alloc_frozen_value(self, heap: &FrozenHeap) -> FrozenValue {
         heap.alloc_simple(self)
     }
 }
 
-impl ::core::fmt::Debug for SlPyObjectWrapper {
+impl ::core::fmt::Debug for SlPyObject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         ::core::fmt::Debug::fmt(&self.0, f)
     }
 }
 
-impl ::std::fmt::Display for SlPyObjectWrapper {
+impl ::std::fmt::Display for SlPyObject {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         ::std::fmt::Display::fmt(&self.0, f)
     }
 }
 
-impl Freeze for SlPyObjectWrapper {
-    type Frozen = SlPyObjectWrapper;
+impl Freeze for SlPyObject {
+    type Frozen = SlPyObject;
 
     fn freeze(self, _freezer: &Freezer) -> anyhow::Result<Self::Frozen> {
         Ok(self)
@@ -59,7 +59,7 @@ impl Freeze for SlPyObjectWrapper {
 }
 
 #[starlark_value(type = "pyobject")]
-impl<'v> StarlarkValue<'v> for SlPyObjectWrapper {
+impl<'v> StarlarkValue<'v> for SlPyObject {
     type Canonical = Self;
 
     fn to_bool(&self) -> bool {

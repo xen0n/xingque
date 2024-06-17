@@ -5,7 +5,8 @@ use starlark::values::list::AllocList;
 use starlark::values::tuple::AllocTuple;
 use starlark::values::{FrozenHeap, FrozenValue, Heap, Value};
 
-pub(crate) mod pyobject_wrapper;
+mod slpyobject;
+pub(crate) use slpyobject::SlPyObject;
 
 pub(crate) fn sl_frozen_value_from_py(value: &Bound<'_, PyAny>, heap: &FrozenHeap) -> FrozenValue {
     if value.is_none() {
@@ -52,9 +53,7 @@ pub(crate) fn sl_frozen_value_from_py(value: &Bound<'_, PyAny>, heap: &FrozenHea
         return heap.alloc(AllocDict(entries));
     }
 
-    heap.alloc(pyobject_wrapper::SlPyObjectWrapper::from(
-        value.clone().unbind(),
-    ))
+    heap.alloc(SlPyObject::from(value.clone().unbind()))
 }
 
 pub(crate) fn sl_value_from_py<'v>(value: &Bound<'_, PyAny>, heap: &'v Heap) -> Value<'v> {
@@ -97,7 +96,5 @@ pub(crate) fn sl_value_from_py<'v>(value: &Bound<'_, PyAny>, heap: &'v Heap) -> 
         return heap.alloc(AllocDict(entries));
     }
 
-    heap.alloc(pyobject_wrapper::SlPyObjectWrapper::from(
-        value.clone().unbind(),
-    ))
+    heap.alloc(SlPyObject::from(value.clone().unbind()))
 }
