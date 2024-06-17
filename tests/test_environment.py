@@ -3,14 +3,14 @@ import xingque
 
 def test_globals_empty():
     x = xingque.Globals()
-    assert not list(x.names)
+    assert not list(x.names())
     assert x.describe() == ""
     assert x.docstring is None
 
 
 def test_globals_standard():
     x = xingque.Globals.standard()
-    assert len(list(x.names)) > 0
+    assert len(list(x.names())) > 0
     assert len(x.describe()) > 0
     assert x.docstring is None
 
@@ -24,18 +24,17 @@ def test_globals_extended_by():
 
     for ty in (tuple, list, set, frozenset):
         x = xingque.Globals.extended_by(ty(list_of_exts))
-        list_of_names = set(x.names)
-        assert "map" in list_of_names
-        assert "filter" not in list_of_names
-        assert "debug" in list_of_names
-        assert "pprint" in list_of_names
+        set_of_names = set(x.names())
+        assert "map" in set_of_names
+        assert "filter" not in set_of_names
+        assert "debug" in set_of_names
+        assert "pprint" in set_of_names
 
 
 def test_globals_builder():
     class Opaque:
         pass
 
-    gb = xingque.GlobalsBuilder()
     opaque = Opaque()
     kv = {
         "foo0": None,
@@ -53,15 +52,17 @@ def test_globals_builder():
         "foo12": opaque,
         "foo13": ...,
     }
+
+    gb = xingque.GlobalsBuilder()
     for k, v in kv.items():
         gb.set(k, v)
     g = gb.build()
 
-    list_of_names = set(g.names)
-    assert len(list_of_names) == 14
+    set_of_names = set(g.names())
+    assert len(set_of_names) == len(kv)
 
     for k, v in g:
-        assert type(k) is str
+        assert isinstance(k, str)
         assert k in kv
         assert v == kv[k]
         if k in {"foo12", "foo13"}:

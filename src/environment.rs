@@ -146,7 +146,6 @@ impl PyGlobals {
         Ok(Globals::extended_by(&extensions).into())
     }
 
-    #[getter]
     fn names(slf: &Bound<'_, Self>) -> PyResult<Py<PyGlobalsNamesIterator>> {
         Py::new(
             slf.py(),
