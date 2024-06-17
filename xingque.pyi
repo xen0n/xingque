@@ -178,6 +178,34 @@ class Module:
     extra_value: object | None = None
     def __init__(self) -> None: ...
 
+# starlark::eval
+
+class Evaluator:
+    def __init__(self, module: Module | None = None) -> None: ...
+    # TODO: disable_gc
+    # TODO: eval_statements
+    # TODO: local_variables
+    def verbose_gc(self) -> None: ...
+    def enable_static_typechecking(self, enable: bool) -> None: ...
+    # TODO: set_loader
+    # TODO: enable_profile
+    # TODO: write_profile
+    # TODO: gen_profile
+    # TODO: coverage
+    def enable_terminal_breakpoint_console(self) -> None: ...
+    # TODO: call_stack
+    # TODO: call_stack_top_frame
+    def call_stack_count(self) -> int: ...
+    def call_stack_top_location(self) -> FileSpan | None: ...
+    # TODO: set_print_handler
+    # TODO: heap
+    @property
+    def module(self) -> Module: ...
+    # TODO: frozen_heap
+    # TODO: set_module_variable_at_some_point (is this okay to expose?)
+    def set_max_callstack_size(self, stack_size: int) -> None: ...
+    def eval_module(self, ast: AstModule, globals: Globals) -> object: ...
+
 # starlark::syntax
 
 class DialectTypes:

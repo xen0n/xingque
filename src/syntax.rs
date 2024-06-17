@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 use starlark::syntax::{AstLoad, AstModule, Dialect, DialectTypes};
 
@@ -177,11 +177,31 @@ impl From<Dialect> for PyDialect {
 }
 
 #[pyclass(module = "xingque", name = "AstModule")]
-pub(crate) struct PyAstModule(AstModule);
+pub(crate) struct PyAstModule(Option<AstModule>);
 
 impl From<AstModule> for PyAstModule {
     fn from(value: AstModule) -> Self {
-        Self(value)
+        Self(Some(value))
+    }
+}
+
+impl PyAstModule {
+    pub(crate) fn inner(&self) -> PyResult<&AstModule> {
+        self.0.as_ref().ok_or(PyRuntimeError::new_err(
+            "this AstModule is already consumed",
+        ))
+    }
+
+    pub(crate) fn inner_mut(&mut self) -> PyResult<&mut AstModule> {
+        self.0.as_mut().ok_or(PyRuntimeError::new_err(
+            "this AstModule is already consumed",
+        ))
+    }
+
+    pub(crate) fn take_inner(&mut self) -> PyResult<AstModule> {
+        self.0.take().ok_or(PyRuntimeError::new_err(
+            "this AstModule is already consumed",
+        ))
     }
 }
 
@@ -206,25 +226,26 @@ impl PyAstModule {
     }
 
     #[getter]
-    fn loads(&self) -> Vec<PyAstLoad> {
-        self.0.loads().into_iter().map(Into::into).collect()
+    fn loads(&self) -> PyResult<Vec<PyAstLoad>> {
+        Ok(self.inner()?.loads().into_iter().map(Into::into).collect())
     }
 
-    fn file_span(&self, x: &PySpan) -> PyFileSpan {
-        self.0.file_span(x.0).into()
+    fn file_span(&self, x: &PySpan) -> PyResult<PyFileSpan> {
+        Ok(self.inner()?.file_span(x.0).into())
     }
 
     #[getter]
-    fn stmt_locations(&self) -> Vec<PyFileSpan> {
-        self.0
+    fn stmt_locations(&self) -> PyResult<Vec<PyFileSpan>> {
+        Ok(self
+            .inner()?
             .stmt_locations()
             .into_iter()
             .map(Into::into)
-            .collect()
+            .collect())
     }
 
-    fn replace_binary_operators(&mut self, replace: HashMap<String, String>) {
-        self.0.replace_binary_operators(&replace);
+    fn replace_binary_operators(&mut self, replace: HashMap<String, String>) -> PyResult<()> {
+        Ok(self.inner_mut()?.replace_binary_operators(&replace))
     }
 }
 

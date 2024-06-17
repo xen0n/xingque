@@ -108,7 +108,7 @@ impl PyLibraryExtension {
 }
 
 #[pyclass(module = "xingque", name = "Globals")]
-pub(crate) struct PyGlobals(Globals);
+pub(crate) struct PyGlobals(pub(crate) Globals);
 
 impl From<Globals> for PyGlobals {
     fn from(value: Globals) -> Self {
@@ -434,7 +434,7 @@ impl PySubGlobalsBuilder {
 }
 
 #[pyclass(module = "xingque", name = "Module")]
-pub(crate) struct PyModule(Module);
+pub(crate) struct PyModule(pub(crate) Module);
 
 impl From<Module> for PyModule {
     fn from(value: Module) -> Self {
