@@ -22,6 +22,7 @@ fn xingque(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<environment::PyGlobals>()?;
     m.add_class::<environment::PyGlobalsBuilder>()?;
     m.add_class::<environment::PyLibraryExtension>()?;
+    m.add_class::<environment::PyModule>()?;
     m.add_class::<syntax::PyAstModule>()?;
     m.add_class::<syntax::PyDialect>()?;
     m.add_class::<syntax::PyDialectTypes>()?;

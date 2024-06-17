@@ -1,11 +1,11 @@
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
-use starlark::environment::{Globals, GlobalsBuilder, LibraryExtension};
+use starlark::environment::{Globals, GlobalsBuilder, LibraryExtension, Module};
 use starlark::values::{FrozenStringValue, FrozenValue};
 
 use crate::hash_utils::TrivialPyHash;
-use crate::py2sl::sl_frozen_value_from_py;
-use crate::sl2py::py_from_sl_frozen_value;
+use crate::py2sl::{self, sl_frozen_value_from_py};
+use crate::sl2py::{self, py_from_sl_frozen_value};
 
 /// The extra library definitions available in this Starlark implementation, but not in the standard.
 #[pyclass(
@@ -433,5 +433,41 @@ impl PySubGlobalsBuilder {
         let heap = self.0.frozen_heap();
         self.0.set(name, sl_frozen_value_from_py(value, heap));
         Ok(())
+    }
+}
+
+#[pyclass(module = "xingque", name = "Module")]
+pub(crate) struct PyModule(Module);
+
+impl From<Module> for PyModule {
+    fn from(value: Module) -> Self {
+        Self(value)
+    }
+}
+
+#[pymethods]
+impl PyModule {
+    #[new]
+    fn py_new() -> Self {
+        Module::new().into()
+    }
+
+    // TODO: heap
+    // TODO: frozen_heap
+    // TODO: names
+    // TODO: names_and_visibilities
+    // TODO: get/set (and __getitem__/__setitem__)
+    // TODO: freeze
+    // TODO: import_public_symbols
+
+    #[getter]
+    fn get_extra_value(&self, py: Python) -> PyResult<Option<PyObject>> {
+        sl2py::py_from_sl_value_option(py, self.0.extra_value())
+    }
+
+    #[setter]
+    fn set_extra_value(&self, value: &Bound<'_, PyAny>) {
+        self.0
+            .set_extra_value(py2sl::sl_value_from_py(value, self.0.heap()));
     }
 }

@@ -90,3 +90,10 @@ pub(crate) fn py_from_sl_value(py: Python<'_>, sl: Value<'_>) -> PyResult<PyObje
         todo!();
     }
 }
+
+pub(crate) fn py_from_sl_value_option(
+    py: Python<'_>,
+    sl: Option<Value<'_>>,
+) -> PyResult<Option<PyObject>> {
+    sl.map(|v| py_from_sl_value(py, v)).transpose()
+}

@@ -175,6 +175,10 @@ class LibraryExtension:
     """Add a function `call_stack()` which returns a string representation of
     the current call stack."""
 
+class Module:
+    extra_value: object | None = None
+    def __init__(self) -> None: ...
+
 # starlark::syntax
 
 class DialectTypes:

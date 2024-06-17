@@ -54,7 +54,7 @@ next-best alternative `pystarlark` was also taken long ago.
     - [ ] `Methods`
     - [ ] `MethodsBuilder`
     - [ ] `MethodsStatic`
-    - [ ] `Module`
+    - [x] `Module` -- partially done
     - [x] `LibraryExtension`
 * [ ] `starlark::errors`
 * [ ] `starlark::eval`

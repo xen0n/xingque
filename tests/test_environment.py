@@ -66,3 +66,11 @@ def test_globals_builder():
         assert v == kv[k]
         if k in {"foo12", "foo13"}:
             assert v is kv[k]
+
+
+def test_module_extra_value():
+    m = xingque.Module()
+    assert m.extra_value is None
+    v = lambda x: x + 1
+    m.extra_value = v
+    assert m.extra_value is v
