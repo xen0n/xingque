@@ -172,17 +172,16 @@ impl PyGlobals {
     // TODO: documentation
 }
 
-// TODO: is the unsendable marker removable?
-#[pyclass(module = "xingque", name = "_GlobalsNamesIterator", unsendable)]
+#[pyclass(module = "xingque", name = "_GlobalsNamesIterator")]
 pub(crate) struct PyGlobalsNamesIterator {
     _parent: Py<PyGlobals>,
-    inner: Box<dyn Iterator<Item = FrozenStringValue>>,
+    inner: Box<dyn Iterator<Item = FrozenStringValue> + Send + Sync>,
 }
 
 impl PyGlobalsNamesIterator {
     fn new(
         parent: &Bound<'_, PyGlobals>,
-        value: Box<dyn Iterator<Item = FrozenStringValue> + '_>,
+        value: Box<dyn Iterator<Item = FrozenStringValue> + Send + Sync + '_>,
     ) -> Self {
         let parent = parent.clone().unbind();
         Self {
@@ -204,17 +203,16 @@ impl PyGlobalsNamesIterator {
     }
 }
 
-// TODO: is the unsendable marker removable?
-#[pyclass(module = "xingque", name = "_GlobalsItemsIterator", unsendable)]
+#[pyclass(module = "xingque", name = "_GlobalsItemsIterator")]
 pub(crate) struct PyGlobalsItemsIterator {
     _parent: Py<PyGlobals>,
-    inner: Box<dyn Iterator<Item = (&'static str, FrozenValue)>>,
+    inner: Box<dyn Iterator<Item = (&'static str, FrozenValue)> + Send + Sync>,
 }
 
 impl PyGlobalsItemsIterator {
     fn new(
         parent: &Bound<'_, PyGlobals>,
-        value: Box<dyn Iterator<Item = (&str, FrozenValue)> + '_>,
+        value: Box<dyn Iterator<Item = (&str, FrozenValue)> + Send + Sync + '_>,
     ) -> Self {
         let parent = parent.clone().unbind();
         Self {
