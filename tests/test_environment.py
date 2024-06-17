@@ -1,3 +1,5 @@
+import gc
+
 import xingque
 
 
@@ -29,6 +31,19 @@ def test_globals_extended_by():
         assert "filter" not in set_of_names
         assert "debug" in set_of_names
         assert "pprint" in set_of_names
+
+
+def test_globals_iter_gc():
+    x = xingque.Globals.standard()
+    it1 = x.names()
+    it2 = x.__iter__()
+    del x
+    gc.collect()
+
+    # these calls should not crash even though the Python-side reference to
+    # the Globals was gone
+    assert it1.__next__()
+    assert it2.__next__()
 
 
 def test_globals_builder():
