@@ -3,7 +3,7 @@ name = "xingque"
 version = "0.1.0"
 authors = ["WANG Xuerui <git@xen0n.name>"]
 description = "星雀 - Yet another Python binding to starlark-rs"
-license = "Apache-2.0 OR MIT"
+license = "Apache-2.0"
 edition = "2021"
 repository = "https://github.com/xen0n/xingque"
 

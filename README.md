@@ -91,6 +91,4 @@ next-best alternative `pystarlark` was also taken long ago.
 
 Copyright &copy; 2024 WANG Xuerui. All rights reserved.
 
-`xingque` is licensed under either the
-[Apache 2.0 license](./LICENSE.Apache-2.0) or the
-[MIT license](./LICENSE.MIT).
+`xingque` is licensed under the [Apache 2.0 license](./LICENSE.Apache-2.0).
