@@ -18,6 +18,7 @@ b + 1 + int(bool(233))
     result = e.eval_module(am, g)
     assert result == 1766
 
+    assert set(e.module.names()) == {"a", "b", "square"}
     assert e.module.get("a") == 42
     # TODO: wrap the "function" type somehow
     # sq = e.module.get('square')

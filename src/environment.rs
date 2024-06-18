@@ -471,7 +471,14 @@ impl PyModule {
 
     // TODO: heap
     // TODO: frozen_heap
-    // TODO: names
+
+    fn names(slf: &Bound<'_, Self>) -> PyResult<Py<PyFrozenStringValueIterator>> {
+        Py::new(
+            slf.py(),
+            PyFrozenStringValueIterator::new(slf, Box::new(slf.borrow().inner()?.names())),
+        )
+    }
+
     // TODO: names_and_visibilities
     // TODO: __getitem__/__setitem__?
 
