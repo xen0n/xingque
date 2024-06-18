@@ -1,5 +1,6 @@
 import gc
 
+import pytest
 import xingque
 
 
@@ -90,3 +91,18 @@ def test_module_extra_value():
     v = lambda x: x + 1
     m.extra_value = v
     assert m.extra_value is v
+
+
+def test_module_freeze():
+    m = xingque.Module()
+    m.set("a", 233)
+    m.set("b", lambda x: x + 1)
+    m.extra_value = range(123)
+
+    fm = m.freeze()
+    assert fm.get("a") == 233
+    assert fm.get("b")(233) == 234
+    assert fm.extra_value == range(123)
+
+    with pytest.raises(RuntimeError):
+        m.get("a")

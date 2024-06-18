@@ -1,6 +1,6 @@
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
-use starlark::environment::{Globals, GlobalsBuilder, LibraryExtension, Module};
+use starlark::environment::{FrozenModule, Globals, GlobalsBuilder, LibraryExtension, Module};
 use starlark::values::{FrozenStringValue, FrozenValue};
 
 use crate::hash_utils::TrivialPyHash;
@@ -433,6 +433,60 @@ impl PySubGlobalsBuilder {
     }
 }
 
+#[pyclass(module = "xingque", name = "FrozenModule")]
+pub(crate) struct PyFrozenModule(FrozenModule);
+
+impl From<FrozenModule> for PyFrozenModule {
+    fn from(value: FrozenModule) -> Self {
+        Self(value)
+    }
+}
+
+#[pymethods]
+impl PyFrozenModule {
+    #[staticmethod]
+    fn from_globals(globals: &Bound<'_, PyGlobals>) -> PyResult<Self> {
+        Ok(FrozenModule::from_globals(&globals.borrow().0)?.into())
+    }
+
+    fn dump_debug(&self) -> String {
+        self.0.dump_debug()
+    }
+
+    fn get_option(&self, py: Python, name: &str) -> PyResult<PyObject> {
+        match self.0.get_option(name)? {
+            Some(sl) => sl2py::py_from_sl_value(py, sl.value()),
+            None => Ok(py.None()),
+        }
+    }
+
+    fn get(&self, py: Python, name: &str) -> PyResult<PyObject> {
+        sl2py::py_from_sl_value(py, self.0.get(name)?.value())
+    }
+
+    fn names(slf: &Bound<'_, Self>) -> PyResult<Py<PyFrozenStringValueIterator>> {
+        Py::new(
+            slf.py(),
+            PyFrozenStringValueIterator::new(slf, Box::new(slf.borrow().0.names())),
+        )
+    }
+
+    fn describe(&self) -> String {
+        self.0.describe()
+    }
+
+    // TODO: documentation
+    // TODO: aggregated_heap_profile_info
+
+    #[getter]
+    fn get_extra_value(&self, py: Python) -> PyResult<PyObject> {
+        match self.0.extra_value() {
+            Some(sl) => sl2py::py_from_sl_frozen_value(py, sl),
+            None => Ok(py.None()),
+        }
+    }
+}
+
 #[pyclass(module = "xingque", name = "Module")]
 pub(crate) struct PyModule(Option<Module>);
 
@@ -492,7 +546,11 @@ impl PyModule {
         Ok(())
     }
 
-    // TODO: freeze
+    fn freeze(&mut self) -> PyResult<PyFrozenModule> {
+        let inner = self.take_inner()?;
+        Ok(inner.freeze()?.into())
+    }
+
     // TODO: import_public_symbols
 
     #[getter]

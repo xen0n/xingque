@@ -47,14 +47,14 @@ next-best alternative `pystarlark` was also taken long ago.
 * [ ] `starlark::debug`
 * [ ] `starlark::docs`
 * [ ] `starlark::environment`
-    - [ ] `FrozenModule`
+    - [x] `FrozenModule` -- mostly done
     - [x] `Globals` -- mostly done
     - [x] `GlobalsBuilder` -- mostly done
     - [ ] `GlobalsStatic`
     - [ ] `Methods`
     - [ ] `MethodsBuilder`
     - [ ] `MethodsStatic`
-    - [x] `Module` -- partially done
+    - [x] `Module` -- mostly done
     - [x] `LibraryExtension`
 * [ ] `starlark::errors`
 * [ ] `starlark::eval`

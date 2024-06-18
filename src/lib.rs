@@ -20,6 +20,7 @@ fn xingque(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<codemap::PyResolvedPos>()?;
     m.add_class::<codemap::PyResolvedSpan>()?;
     m.add_class::<codemap::PySpan>()?;
+    m.add_class::<environment::PyFrozenModule>()?;
     m.add_class::<environment::PyGlobals>()?;
     m.add_class::<environment::PyGlobalsBuilder>()?;
     m.add_class::<environment::PyLibraryExtension>()?;
