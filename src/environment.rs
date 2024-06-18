@@ -453,7 +453,17 @@ impl PyModule {
     // TODO: frozen_heap
     // TODO: names
     // TODO: names_and_visibilities
-    // TODO: get/set (and __getitem__/__setitem__)
+    // TODO: __getitem__/__setitem__?
+
+    fn get(&self, py: Python, name: &str) -> PyResult<Option<PyObject>> {
+        sl2py::py_from_sl_value_option(py, self.0.get(name))
+    }
+
+    fn set(&mut self, name: &str, value: &Bound<'_, PyAny>) {
+        self.0
+            .set(name, py2sl::sl_value_from_py(value, self.0.heap()))
+    }
+
     // TODO: freeze
     // TODO: import_public_symbols
 
