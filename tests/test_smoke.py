@@ -66,7 +66,12 @@ def test_magic_method_forwarding():
     @functools.total_ordering
     class Foo:
         def __init__(self) -> None:
-            self.methods_called: list[str] = []
+            self.methods_called: list[str]
+            self.setattr_value: dict[str, object]
+
+            # prevent infinite recursion
+            super().__setattr__("methods_called", [])
+            super().__setattr__("setattr_value", {})
 
         def __bool__(self) -> bool:
             self.methods_called.append("bool")
@@ -94,6 +99,16 @@ def test_magic_method_forwarding():
             assert bar == "baz"
             return {"ok": True, "test": ["aaa", "bbb", "ccc"]}
 
+        def __getattr__(self, name: str) -> object:
+            self.methods_called.append(f"getattr:{name}")
+            if name == "nonexistent":
+                raise AttributeError
+            return f"return_{name}"
+
+        def __setattr__(self, name: str, value: object) -> None:
+            self.methods_called.append(f"setattr:{name}")
+            self.setattr_value[name] = value
+
     text = """
 to_bool = bool(foo)
 eq = foo == 123
@@ -107,8 +122,13 @@ length = len(foo)
 contains = 123 in foo
 invoke = foo(123, bar='baz')
 
+get_attr = foo.test_get_attr
+foo.test_set_attr = any
+has_attr1 = hasattr(foo, 'methods_called')
+has_attr2 = hasattr(foo, 'nonexistent')
+dir_attr = dir(foo)
+
 # TODO
-#getitem = foo.test
 #add = foo + 123
 #sub = foo - 123
 #mul = foo * 123
@@ -137,6 +157,10 @@ invoke = foo(123, bar='baz')
         "len",
         "contains",
         "call",
+        "getattr:test_get_attr",
+        "getattr:test_get_attr",
+        "setattr:test_set_attr",
+        "getattr:nonexistent",
     ]
     assert not m.get("to_bool")
     assert m.get("eq")
@@ -148,3 +172,10 @@ invoke = foo(123, bar='baz')
     assert m.get("length") == 111222
     assert m.get("contains")
     assert m.get("invoke") == {"ok": True, "test": ["aaa", "bbb", "ccc"]}
+    assert m.get("get_attr") == "return_test_get_attr"
+    assert set(recorder.setattr_value.keys()) == {
+        "test_set_attr",
+    }
+    assert m.get("has_attr1")
+    assert not m.get("has_attr2")
+    assert m.get("dir_attr") == dir(recorder)

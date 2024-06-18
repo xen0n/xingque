@@ -203,4 +203,45 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
         result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
     }
     */
+
+    fn get_attr(&self, attribute: &str, heap: &'v Heap) -> Option<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            // no way to propagate error with this interface
+            if let Some(v) = inner.getattr(attribute).ok() {
+                Some(sl_value_from_py(&v, heap))
+            } else {
+                None
+            }
+        })
+    }
+
+    fn has_attr(&self, attribute: &str, _heap: &'v Heap) -> bool {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            // no way to propagate error with this interface
+            inner.hasattr(attribute)
+        })
+        .unwrap_or(false)
+    }
+
+    fn dir_attr(&self) -> Vec<String> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            inner
+                .dir()
+                .into_iter()
+                .map(|x| x.extract::<String>().unwrap())
+                .collect()
+        })
+    }
+
+    fn set_attr(&self, attribute: &str, new_value: Value<'v>) -> starlark::Result<()> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let new_value = py_from_sl_value(py, new_value)?;
+            inner.setattr(attribute, new_value)
+        })
+        .map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+    }
 }
