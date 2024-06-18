@@ -1,12 +1,15 @@
+use std::collections::HashMap;
+
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
+use pyo3::types::{PyDict, PyTuple};
 use starlark::environment::Module;
 use starlark::eval::Evaluator;
 
 use crate::codemap::PyFileSpan;
 use crate::environment::{PyGlobals, PyModule};
-use crate::sl2py;
 use crate::syntax::PyAstModule;
+use crate::{py2sl, sl2py};
 
 // it seems the Evaluator contains many thread-unsafe states
 #[pyclass(module = "xingque", name = "Evaluator", unsendable)]
@@ -35,8 +38,29 @@ impl PyEvaluator {
     }
 
     // TODO: disable_gc
-    // TODO: eval_statements
-    // TODO: local_variables
+
+    fn eval_statements(
+        &mut self,
+        py: Python,
+        statements: &Bound<'_, PyAstModule>,
+    ) -> PyResult<PyObject> {
+        match self
+            .0
+            .eval_statements(statements.borrow_mut().take_inner()?)
+        {
+            Ok(sl) => sl2py::py_from_sl_value(py, sl),
+            Err(e) => Err(PyRuntimeError::new_err(e.to_string())),
+        }
+    }
+
+    fn local_variables(&self, py: Python) -> PyResult<HashMap<String, PyObject>> {
+        let vars = self.0.local_variables();
+        let mut result = HashMap::with_capacity(vars.len());
+        for (k, v) in vars.into_iter() {
+            result.insert(k.to_string(), sl2py::py_from_sl_value(py, v)?);
+        }
+        Ok(result)
+    }
 
     fn verbose_gc(&mut self) {
         self.0.verbose_gc()
@@ -93,6 +117,35 @@ impl PyEvaluator {
             .0
             .eval_module(ast.borrow_mut().take_inner()?, &globals.borrow().0)
         {
+            Ok(sl) => sl2py::py_from_sl_value(py, sl),
+            Err(e) => Err(PyRuntimeError::new_err(e.to_string())),
+        }
+    }
+
+    #[pyo3(signature = (function, *args, **kwargs))]
+    fn eval_function(
+        &mut self,
+        py: Python,
+        function: &Bound<'_, PyAny>,
+        args: &Bound<'_, PyTuple>,
+        kwargs: Option<&Bound<'_, PyDict>>,
+    ) -> PyResult<PyObject> {
+        let heap = self.0.heap();
+        let to_sl = |x| py2sl::sl_value_from_py(x, heap);
+        let function = to_sl(function);
+        let positional: Vec<_> = args.as_slice().iter().map(to_sl).collect();
+        let named: Vec<_> = if let Some(kwargs) = kwargs {
+            let mut tmp = Vec::with_capacity(kwargs.len());
+            for (k, v) in kwargs.clone().into_iter() {
+                tmp.push((k.extract::<String>()?, v));
+            }
+            tmp
+        } else {
+            Vec::new()
+        };
+        let named: Vec<_> = named.iter().map(|(k, v)| (k.as_str(), to_sl(v))).collect();
+
+        match self.0.eval_function(function, &positional, &named) {
             Ok(sl) => sl2py::py_from_sl_value(py, sl),
             Err(e) => Err(PyRuntimeError::new_err(e.to_string())),
         }
