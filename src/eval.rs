@@ -20,11 +20,16 @@ pub(crate) struct PyEvaluator(
 );
 
 impl PyEvaluator {
-    fn new(module: Bound<'_, PyModule>) -> Self {
+    fn new(module: Bound<'_, PyModule>) -> PyResult<Self> {
         let module_ref = module.clone().unbind();
-        let module = &module.borrow().0;
+        let module = module.borrow();
+        let module = module.inner()?;
         let module: &'static Module = unsafe { ::core::mem::transmute(module) };
-        Self(Evaluator::new(module), module_ref)
+        Ok(Self(Evaluator::new(module), module_ref))
+    }
+
+    fn ensure_module_available(&self, py: Python) -> PyResult<()> {
+        self.1.bind(py).borrow().inner().map(|_| ())
     }
 }
 
@@ -34,7 +39,7 @@ impl PyEvaluator {
     fn py_new(py: Python, module: Option<Bound<'_, PyModule>>) -> PyResult<Self> {
         let module =
             module.map_or_else(|| Bound::new(py, PyModule::from(Module::new())), Result::Ok)?;
-        Ok(Self::new(module))
+        Self::new(module)
     }
 
     // TODO: disable_gc
@@ -44,6 +49,8 @@ impl PyEvaluator {
         py: Python,
         statements: &Bound<'_, PyAstModule>,
     ) -> PyResult<PyObject> {
+        self.ensure_module_available(py)?;
+
         match self
             .0
             .eval_statements(statements.borrow_mut().take_inner()?)
@@ -54,6 +61,8 @@ impl PyEvaluator {
     }
 
     fn local_variables(&self, py: Python) -> PyResult<HashMap<String, PyObject>> {
+        self.ensure_module_available(py)?;
+
         let vars = self.0.local_variables();
         let mut result = HashMap::with_capacity(vars.len());
         for (k, v) in vars.into_iter() {
@@ -62,12 +71,16 @@ impl PyEvaluator {
         Ok(result)
     }
 
-    fn verbose_gc(&mut self) {
-        self.0.verbose_gc()
+    fn verbose_gc(&mut self, py: Python) -> PyResult<()> {
+        self.ensure_module_available(py)?;
+        self.0.verbose_gc();
+        Ok(())
     }
 
-    fn enable_static_typechecking(&mut self, enable: bool) {
-        self.0.enable_static_typechecking(enable)
+    fn enable_static_typechecking(&mut self, py: Python, enable: bool) -> PyResult<()> {
+        self.ensure_module_available(py)?;
+        self.0.enable_static_typechecking(enable);
+        Ok(())
     }
 
     // TODO: set_loader
@@ -76,33 +89,39 @@ impl PyEvaluator {
     // TODO: gen_profile
     // TODO: coverage
 
-    fn enable_terminal_breakpoint_console(&mut self) {
-        self.0.enable_terminal_breakpoint_console()
+    fn enable_terminal_breakpoint_console(&mut self, py: Python) -> PyResult<()> {
+        self.ensure_module_available(py)?;
+        self.0.enable_terminal_breakpoint_console();
+        Ok(())
     }
 
     // TODO: call_stack
     // TODO: call_stack_top_frame
 
-    fn call_stack_count(&self) -> usize {
-        self.0.call_stack_count()
+    fn call_stack_count(&self, py: Python) -> PyResult<usize> {
+        self.ensure_module_available(py)?;
+        Ok(self.0.call_stack_count())
     }
 
-    fn call_stack_top_location(&self) -> Option<PyFileSpan> {
-        self.0.call_stack_top_location().map(PyFileSpan::from)
+    fn call_stack_top_location(&self, py: Python) -> PyResult<Option<PyFileSpan>> {
+        self.ensure_module_available(py)?;
+        Ok(self.0.call_stack_top_location().map(PyFileSpan::from))
     }
 
     // TODO: set_print_handler
     // TODO: heap
 
     #[getter]
-    fn module(&self) -> Py<PyModule> {
-        self.1.clone()
+    fn module(&self, py: Python) -> PyResult<Py<PyModule>> {
+        self.ensure_module_available(py)?;
+        Ok(self.1.clone())
     }
 
     // TODO: frozen_heap
     // TODO: set_module_variable_at_some_point (is this okay to expose?)
 
-    fn set_max_callstack_size(&mut self, stack_size: usize) -> PyResult<()> {
+    fn set_max_callstack_size(&mut self, py: Python, stack_size: usize) -> PyResult<()> {
+        self.ensure_module_available(py)?;
         self.0.set_max_callstack_size(stack_size)?;
         Ok(())
     }
@@ -113,6 +132,8 @@ impl PyEvaluator {
         ast: &Bound<'_, PyAstModule>,
         globals: &Bound<'_, PyGlobals>,
     ) -> PyResult<PyObject> {
+        self.ensure_module_available(py)?;
+
         match self
             .0
             .eval_module(ast.borrow_mut().take_inner()?, &globals.borrow().0)
@@ -130,6 +151,8 @@ impl PyEvaluator {
         args: &Bound<'_, PyTuple>,
         kwargs: Option<&Bound<'_, PyDict>>,
     ) -> PyResult<PyObject> {
+        self.ensure_module_available(py)?;
+
         let heap = self.0.heap();
         let to_sl = |x| py2sl::sl_value_from_py(x, heap);
         let function = to_sl(function);

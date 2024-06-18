@@ -434,11 +434,31 @@ impl PySubGlobalsBuilder {
 }
 
 #[pyclass(module = "xingque", name = "Module")]
-pub(crate) struct PyModule(pub(crate) Module);
+pub(crate) struct PyModule(Option<Module>);
 
 impl From<Module> for PyModule {
     fn from(value: Module) -> Self {
-        Self(value)
+        Self(Some(value))
+    }
+}
+
+impl PyModule {
+    pub(crate) fn inner(&self) -> PyResult<&Module> {
+        self.0
+            .as_ref()
+            .ok_or(PyRuntimeError::new_err("this Module is already consumed"))
+    }
+
+    pub(crate) fn inner_mut(&mut self) -> PyResult<&mut Module> {
+        self.0
+            .as_mut()
+            .ok_or(PyRuntimeError::new_err("this Module is already consumed"))
+    }
+
+    pub(crate) fn take_inner(&mut self) -> PyResult<Module> {
+        self.0
+            .take()
+            .ok_or(PyRuntimeError::new_err("this Module is already consumed"))
     }
 }
 
@@ -456,12 +476,13 @@ impl PyModule {
     // TODO: __getitem__/__setitem__?
 
     fn get(&self, py: Python, name: &str) -> PyResult<Option<PyObject>> {
-        sl2py::py_from_sl_value_option(py, self.0.get(name))
+        sl2py::py_from_sl_value_option(py, self.inner()?.get(name))
     }
 
-    fn set(&mut self, name: &str, value: &Bound<'_, PyAny>) {
-        self.0
-            .set(name, py2sl::sl_value_from_py(value, self.0.heap()))
+    fn set(&mut self, name: &str, value: &Bound<'_, PyAny>) -> PyResult<()> {
+        let inner = self.inner_mut()?;
+        inner.set(name, py2sl::sl_value_from_py(value, inner.heap()));
+        Ok(())
     }
 
     // TODO: freeze
@@ -469,12 +490,13 @@ impl PyModule {
 
     #[getter]
     fn get_extra_value(&self, py: Python) -> PyResult<Option<PyObject>> {
-        sl2py::py_from_sl_value_option(py, self.0.extra_value())
+        sl2py::py_from_sl_value_option(py, self.inner()?.extra_value())
     }
 
     #[setter]
-    fn set_extra_value(&self, value: &Bound<'_, PyAny>) {
-        self.0
-            .set_extra_value(py2sl::sl_value_from_py(value, self.0.heap()));
+    fn set_extra_value(&self, value: &Bound<'_, PyAny>) -> PyResult<()> {
+        let inner = self.inner()?;
+        inner.set_extra_value(py2sl::sl_value_from_py(value, inner.heap()));
+        Ok(())
     }
 }
