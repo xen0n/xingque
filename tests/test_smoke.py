@@ -17,3 +17,8 @@ b + 1 + int(bool(233))
     e = xingque.Evaluator()
     result = e.eval_module(am, g)
     assert result == 1766
+
+    assert e.module.get("a") == 42
+    # TODO: wrap the "function" type somehow
+    # sq = e.module.get('square')
+    # assert e.eval_function(sq, 12) == 144
