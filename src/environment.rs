@@ -358,7 +358,7 @@ impl PyGlobalsBuilder {
         };
         let heap = inner.frozen_heap();
 
-        inner.set(name, sl_frozen_value_from_py(value, heap));
+        inner.set(name, sl_frozen_value_from_py(value, heap)?);
         Ok(())
     }
 
@@ -428,7 +428,7 @@ impl PySubGlobalsBuilder {
 
     fn set(&mut self, name: &str, value: &Bound<'_, PyAny>) -> PyResult<()> {
         let heap = self.0.frozen_heap();
-        self.0.set(name, sl_frozen_value_from_py(value, heap));
+        self.0.set(name, sl_frozen_value_from_py(value, heap)?);
         Ok(())
     }
 }

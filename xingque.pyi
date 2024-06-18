@@ -286,6 +286,9 @@ class AstModule:
 
 # starlark::values
 
+class FrozenValue:
+    pass
+
 class HeapSummary:
     def summary(self) -> dict[str, tuple[int, int]]: ...
     @property
@@ -300,3 +303,6 @@ class Heap:
     @property
     def available_bytes(self) -> int: ...
     def allocated_summary(self) -> HeapSummary: ...
+
+class Value:
+    pass

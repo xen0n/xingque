@@ -30,7 +30,9 @@ fn xingque(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<syntax::PyAstModule>()?;
     m.add_class::<syntax::PyDialect>()?;
     m.add_class::<syntax::PyDialectTypes>()?;
+    m.add_class::<values::PyFrozenValue>()?;
     m.add_class::<values::PyHeap>()?;
     m.add_class::<values::PyHeapSummary>()?;
+    m.add_class::<values::PyValue>()?;
     Ok(())
 }

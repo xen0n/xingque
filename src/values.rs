@@ -1,7 +1,23 @@
 use std::collections::HashMap;
 
 use pyo3::{prelude::*, types::PyTuple};
-use starlark::values::Heap;
+use starlark::values::{FrozenValue, Heap, Value};
+
+#[pyclass(module = "xingque", name = "FrozenValue")]
+pub(crate) struct PyFrozenValue(pub(crate) FrozenValue);
+
+impl From<FrozenValue> for PyFrozenValue {
+    fn from(value: FrozenValue) -> Self {
+        Self(value)
+    }
+}
+
+#[pymethods]
+impl PyFrozenValue {
+    fn __repr__(&self) -> String {
+        format!("<Starlark frozen value {}>", self.0)
+    }
+}
 
 /// Information about the data stored on a heap.
 #[pyclass(module = "xingque", name = "HeapSummary")]
@@ -73,5 +89,22 @@ impl PyHeap {
     /// Obtain a summary of how much memory is currently allocated by this heap.
     fn allocated_summary(&self) -> PyHeapSummary {
         self.0.allocated_summary().summary().into()
+    }
+}
+
+#[pyclass(module = "xingque", name = "Value")]
+pub(crate) struct PyValue(pub(crate) Value<'static>);
+
+impl<'v> From<Value<'v>> for PyValue {
+    fn from(value: Value<'v>) -> Self {
+        // TODO: safety
+        Self(unsafe { ::core::mem::transmute(value) })
+    }
+}
+
+#[pymethods]
+impl PyValue {
+    fn __repr__(&self) -> String {
+        format!("<Starlark value {}>", self.0)
     }
 }

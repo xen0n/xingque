@@ -71,7 +71,7 @@ next-best alternative `pystarlark` was also taken long ago.
     - [ ] `FrozenHeap`
     - [ ] `FrozenHeapRef`
     - [ ] `FrozenRef`
-    - [ ] `FrozenValue`
+    - [x] `FrozenValue`
     - [ ] `FrozenValueTyped`
     - [x] `Heap` -- partially done
     - [ ] `OwnedFrozenRef`
@@ -80,7 +80,7 @@ next-best alternative `pystarlark` was also taken long ago.
     - [ ] `StarlarkIterator`
     - [ ] `StarlarkStrNRepr`
     - [ ] `Tracer`
-    - [ ] `Value`
+    - [x] `Value`
     - [ ] `ValueIdentity`
     - [ ] `ValueOf`
     - [ ] `ValueOfUnchecked`

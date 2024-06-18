@@ -20,9 +20,9 @@ b + 1 + int(bool(233))
 
     assert set(e.module.names()) == {"a", "b", "square"}
     assert e.module.get("a") == 42
-    # TODO: wrap the "function" type somehow
-    # sq = e.module.get('square')
-    # assert e.eval_function(sq, 12) == 144
+
+    sq = e.module.get("square")
+    assert e.eval_function(sq, 12) == 144
 
 
 def test_load_stmt():

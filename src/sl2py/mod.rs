@@ -9,6 +9,7 @@ use starlark::values::tuple::{FrozenTupleRef, TupleRef};
 use starlark::values::{FrozenValue, UnpackValue, Value, ValueLike};
 
 use crate::py2sl::SlPyObject;
+use crate::values::{PyFrozenValue, PyValue};
 
 mod native_function;
 use native_function::PySlNativeFunction;
@@ -51,8 +52,7 @@ pub(crate) fn py_from_sl_frozen_value(py: Python<'_>, sl: FrozenValue) -> PyResu
     } else if let Some(x) = sl.downcast_frozen_ref::<SlPyObject>() {
         Ok(x.0.clone_ref(py))
     } else {
-        dbg!(sl);
-        todo!();
+        Ok(Py::new(py, PyFrozenValue::from(sl))?.as_any().clone())
     }
 }
 
@@ -94,8 +94,7 @@ pub(crate) fn py_from_sl_value(py: Python<'_>, sl: Value<'_>) -> PyResult<PyObje
     } else if let Some(x) = sl.downcast_ref::<SlPyObject>() {
         Ok(x.0.clone_ref(py))
     } else {
-        dbg!(sl);
-        todo!();
+        Ok(Py::new(py, PyValue::from(sl))?.as_any().clone())
     }
 }
 
