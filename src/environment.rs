@@ -146,10 +146,10 @@ impl PyGlobals {
         Ok(Globals::extended_by(&extensions).into())
     }
 
-    fn names(slf: &Bound<'_, Self>) -> PyResult<Py<PyGlobalsNamesIterator>> {
+    fn names(slf: &Bound<'_, Self>) -> PyResult<Py<PyFrozenStringValueIterator>> {
         Py::new(
             slf.py(),
-            PyGlobalsNamesIterator::new(slf, Box::new(slf.borrow().0.names())),
+            PyFrozenStringValueIterator::new(slf, Box::new(slf.borrow().0.names())),
         )
     }
 
@@ -172,15 +172,15 @@ impl PyGlobals {
     // TODO: documentation
 }
 
-#[pyclass(module = "xingque", name = "_GlobalsNamesIterator")]
-pub(crate) struct PyGlobalsNamesIterator {
-    _parent: Py<PyGlobals>,
+#[pyclass(module = "xingque", name = "_FrozenStringValueIterator")]
+pub(crate) struct PyFrozenStringValueIterator {
+    _parent: PyObject,
     inner: Box<dyn Iterator<Item = FrozenStringValue> + Send + Sync>,
 }
 
-impl PyGlobalsNamesIterator {
+impl PyFrozenStringValueIterator {
     fn new(
-        parent: &Bound<'_, PyGlobals>,
+        parent: &Bound<'_, PyAny>,
         value: Box<dyn Iterator<Item = FrozenStringValue> + Send + Sync + '_>,
     ) -> Self {
         let parent = parent.clone().unbind();
@@ -193,7 +193,7 @@ impl PyGlobalsNamesIterator {
 }
 
 #[pymethods]
-impl PyGlobalsNamesIterator {
+impl PyFrozenStringValueIterator {
     fn __iter__(slf: PyRef<'_, Self>) -> PyRef<'_, Self> {
         slf
     }
