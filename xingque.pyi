@@ -1,4 +1,4 @@
-from typing import Callable, Iterable, Iterator, Self
+from typing import Callable, Iterable, Iterator, Protocol, Self
 
 # starlark::codemap
 
@@ -196,6 +196,13 @@ class Module:
 
 # starlark::eval
 
+class _FileLoader(Protocol):
+    def load(self, path: str) -> FrozenModule: ...
+
+class DictFileLoader:
+    def __init__(self, modules: dict[str, FrozenModule]) -> None: ...
+    def load(self, path: str) -> FrozenModule: ...
+
 class Evaluator:
     def __init__(self, module: Module | None = None) -> None: ...
     # TODO: disable_gc
@@ -203,7 +210,7 @@ class Evaluator:
     def local_variables(self) -> dict[str, object]: ...
     def verbose_gc(self) -> None: ...
     def enable_static_typechecking(self, enable: bool) -> None: ...
-    # TODO: set_loader
+    def set_loader(self, loader: _FileLoader) -> None: ...
     # TODO: enable_profile
     # TODO: write_profile
     # TODO: gen_profile

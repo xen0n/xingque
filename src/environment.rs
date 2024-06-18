@@ -434,7 +434,8 @@ impl PySubGlobalsBuilder {
 }
 
 #[pyclass(module = "xingque", name = "FrozenModule")]
-pub(crate) struct PyFrozenModule(FrozenModule);
+#[derive(Clone)]
+pub(crate) struct PyFrozenModule(pub(crate) FrozenModule);
 
 impl From<FrozenModule> for PyFrozenModule {
     fn from(value: FrozenModule) -> Self {
