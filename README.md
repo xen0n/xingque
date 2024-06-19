@@ -39,8 +39,9 @@ This project as compared to other known bindings:
 |---|---|---|---|
 |License|Apache-2.0|Apache-2.0|Apache-2.0|
 |`py.typed`|:white_check_mark:|:x:|:white_check_mark:|
-|Bundled :sparkles:|Rust, 0.12.x|Rust, 0.10.x|Go, circa March 2023|
 |Binding framework|PyO3|PyO3|cgo|
+|[ABI3] compatibility|:white_check_mark: any Python &ge; 3.8|:x:|:x:|
+|Bundled :sparkles:|Rust, 0.12.x|Rust, 0.10.x|Go, circa March 2023|
 |Data marshalling :snake::arrow_right::sparkles:|:zap: native FFI|:package: via Python `json`|:zap: native FFI|
 |Data marshalling :sparkles::arrow_right::snake:|:zap: native FFI|:package: via Python `json`|:zap: native FFI|
 |Putting opaque :snake: values into :sparkles:|:white_check_mark:|:x:|:boom: crashes|
@@ -53,6 +54,8 @@ This project as compared to other known bindings:
 |LSP integration|:calendar: planned|:x:|:x:|
 |Profiling & code coverage|:calendar: planned|:x:|:x:|
 |Structured :sparkles: documentation|:calendar: planned|:x:|:x:|
+
+[ABI3]: https://docs.python.org/3/c-api/stable.html#stable-abi
 
 ### Objects across language boundary
 

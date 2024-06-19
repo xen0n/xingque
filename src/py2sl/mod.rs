@@ -27,13 +27,13 @@ pub(crate) fn sl_frozen_value_from_py(
         Ok(heap.alloc(x))
     } else if let Ok(x) = value.extract::<f64>() {
         Ok(heap.alloc(x))
-    } else if let Ok(x) = value.extract::<&str>() {
+    } else if let Ok(x) = value.extract::<String>() {
         Ok(heap.alloc(x))
     } else if let Ok(x) = value.downcast::<PyTuple>() {
         let entries = {
             let mut tmp = Vec::new();
-            for elem in x.as_slice().into_iter() {
-                tmp.push(sl_frozen_value_from_py(elem, heap)?);
+            for elem in x.iter_borrowed() {
+                tmp.push(sl_frozen_value_from_py(&elem, heap)?);
             }
             tmp
         };
@@ -84,13 +84,10 @@ pub(crate) fn sl_value_from_py<'v>(value: &Bound<'_, PyAny>, heap: &'v Heap) -> 
         heap.alloc(x)
     } else if let Ok(x) = value.extract::<f64>() {
         heap.alloc(x)
-    } else if let Ok(x) = value.extract::<&str>() {
+    } else if let Ok(x) = value.extract::<String>() {
         heap.alloc(x)
     } else if let Ok(x) = value.downcast::<PyTuple>() {
-        let entries = x
-            .as_slice()
-            .into_iter()
-            .map(|elem| sl_value_from_py(elem, heap));
+        let entries = x.iter_borrowed().map(|elem| sl_value_from_py(&elem, heap));
         heap.alloc(AllocTuple(entries))
     } else if let Ok(x) = value.downcast::<PyList>() {
         let entries = x.into_iter().map(|elem| sl_value_from_py(&elem, heap));

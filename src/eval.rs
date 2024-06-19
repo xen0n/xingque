@@ -173,7 +173,10 @@ impl PyEvaluator {
         let heap = self.0.heap();
         let to_sl = |x| py2sl::sl_value_from_py(x, heap);
         let function = to_sl(function);
-        let positional: Vec<_> = args.as_slice().iter().map(to_sl).collect();
+        let positional: Vec<_> = args
+            .iter_borrowed()
+            .map(|x| py2sl::sl_value_from_py(&x, heap)) // borrowck doesn't let me use to_sl, sigh
+            .collect();
         let named: Vec<_> = if let Some(kwargs) = kwargs {
             let mut tmp = Vec::with_capacity(kwargs.len());
             for (k, v) in kwargs.clone().into_iter() {
