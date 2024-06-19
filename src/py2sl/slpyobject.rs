@@ -82,29 +82,29 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
                     hasher.write_isize(hash);
                     Ok(())
                 }
-                Err(e) => Err(starlark::Error::new(starlark::ErrorKind::Value(e.into()))),
+                Err(e) => Err(sl_value_err_from_py(e)),
             }
         })
     }
 
     fn equals(&self, other: Value<'v>) -> starlark::Result<bool> {
-        let result: PyResult<bool> = Python::with_gil(|py| {
+        let result = Python::with_gil(|py| {
             let inner = self.0.bind(py);
             let other = py_from_sl_value(py, other)?;
             inner.eq(other)
         });
 
-        result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+        result.map_err(sl_value_err_from_py)
     }
 
     fn compare(&self, other: Value<'v>) -> starlark::Result<Ordering> {
-        let result: PyResult<Ordering> = Python::with_gil(|py| {
+        let result = Python::with_gil(|py| {
             let inner = self.0.bind(py);
             let other = py_from_sl_value(py, other)?;
             inner.compare(other)
         });
 
-        result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+        result.map_err(sl_value_err_from_py)
     }
 
     fn invoke(
@@ -171,7 +171,7 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
                 .map(|v| sl_value_from_py(&v, heap))
         });
 
-        result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+        result.map_err(sl_value_err_from_py)
     }
 
     fn length(&self) -> starlark::Result<i32> {
@@ -179,7 +179,7 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
             let inner = self.0.bind(py);
             match inner.len() {
                 Ok(len) => Ok(len as i32),
-                Err(e) => Err(starlark::Error::new(starlark::ErrorKind::Value(e.into()))),
+                Err(e) => Err(sl_value_err_from_py(e)),
             }
         })
     }
@@ -191,7 +191,7 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
             inner.contains(other)
         });
 
-        result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+        result.map_err(sl_value_err_from_py)
     }
 
     // TODO: plus/minus only wrappable after
@@ -204,7 +204,7 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
             inner.pos()
         });
 
-        result.map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+        result.map_err(sl_value_err_from_py)
     }
     */
 
@@ -246,7 +246,7 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
             let new_value = py_from_sl_value(py, new_value)?;
             inner.setattr(attribute, new_value)
         })
-        .map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+        .map_err(sl_value_err_from_py)
     }
 
     fn add(&self, rhs: Value<'v>, heap: &'v Heap) -> Option<starlark::Result<Value<'v>>> {
