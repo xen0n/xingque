@@ -58,6 +58,10 @@ impl Freeze for SlPyObject {
     }
 }
 
+fn sl_value_err_from_py(e: PyErr) -> starlark::Error {
+    starlark::Error::new(starlark::ErrorKind::Value(e.into()))
+}
+
 #[starlark_value(type = "pyobject")]
 impl<'v> StarlarkValue<'v> for SlPyObject {
     type Canonical = Self;
@@ -243,5 +247,135 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
             inner.setattr(attribute, new_value)
         })
         .map_err(|e| starlark::Error::new(starlark::ErrorKind::Value(e.into())))
+    }
+
+    fn add(&self, rhs: Value<'v>, heap: &'v Heap) -> Option<starlark::Result<Value<'v>>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Some(Err(sl_value_err_from_py(e))),
+            };
+            match inner.add(rhs.bind(py)) {
+                Ok(result) => Some(Ok(sl_value_from_py(&result, heap))),
+                Err(e) => Some(Err(sl_value_err_from_py(e))),
+            }
+        })
+    }
+
+    fn sub(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Err(sl_value_err_from_py(e)),
+            };
+            match inner.sub(rhs.bind(py)) {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
+    }
+
+    fn mul(&self, rhs: Value<'v>, heap: &'v Heap) -> Option<starlark::Result<Value<'v>>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Some(Err(sl_value_err_from_py(e))),
+            };
+            match inner.mul(rhs.bind(py)) {
+                Ok(result) => Some(Ok(sl_value_from_py(&result, heap))),
+                Err(e) => Some(Err(sl_value_err_from_py(e))),
+            }
+        })
+    }
+
+    fn div(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Err(sl_value_err_from_py(e)),
+            };
+            match inner.div(rhs.bind(py)) {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
+    }
+
+    // TODO: percent & floor_div
+
+    fn bit_and(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Err(sl_value_err_from_py(e)),
+            };
+            match inner.bitand(rhs.bind(py)) {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
+    }
+
+    fn bit_or(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Err(sl_value_err_from_py(e)),
+            };
+            match inner.bitor(rhs.bind(py)) {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
+    }
+
+    fn bit_xor(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Err(sl_value_err_from_py(e)),
+            };
+            match inner.bitxor(rhs.bind(py)) {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
+    }
+
+    // TODO: bit_not
+
+    fn left_shift(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Err(sl_value_err_from_py(e)),
+            };
+            match inner.lshift(rhs.bind(py)) {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
+    }
+
+    fn right_shift(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Err(sl_value_err_from_py(e)),
+            };
+            match inner.rshift(rhs.bind(py)) {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
     }
 }
