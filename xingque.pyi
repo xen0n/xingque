@@ -1,5 +1,7 @@
 from typing import Callable, Iterable, Iterator, Protocol, Self
 
+VERSION: str
+
 # starlark::codemap
 
 class CodeMap:

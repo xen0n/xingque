@@ -12,6 +12,10 @@ mod values;
 
 #[pymodule]
 fn xingque(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add(
+        "VERSION",
+        option_env!("CARGO_PKG_VERSION").unwrap_or("unknown"),
+    )?;
     m.add_class::<codemap::PyCodeMap>()?;
     m.add_class::<codemap::PyFileSpan>()?;
     m.add_class::<codemap::PyPos>()?;
