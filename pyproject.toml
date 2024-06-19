@@ -4,16 +4,38 @@ build-backend = "maturin"
 
 [project]
 name = "xingque"
+version = "0.1.0"
+description = "Yet another typed Python binding to starlark-rust"
+readme = "README.md"
 requires-python = ">=3.8"
+license = "Apache-2.0"
+keywords = ["starlark", "starlark-rust", "pyo3"]
+authors = [
+  { name = "WANG Xuerui", email = "git@xen0n.name" },
+]
+maintainers = [
+  { name = "WANG Xuerui", email = "git@xen0n.name" },
+]
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Rust",
+    "Programming Language :: Python",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Interpreters",
     "Typing :: Typed",
 ]
 dynamic = ["version"]
 
+[project.urls]
+homepage = "https://github.com/xen0n/xingque"
+repository = "https://github.com/xen0n/xingque"
+changelog = "https://github.com/xen0n/xingque/blob/main/CHANGELOG.md"
+
 [tool.maturin]
+profile = "release"
 features = ["pyo3/extension-module", "pyo3/abi3", "pyo3/abi3-py38"]
 
 [tool.pytest.ini_options]
