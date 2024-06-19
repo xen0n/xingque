@@ -16,6 +16,7 @@ fn xingque(m: &Bound<'_, PyModule>) -> PyResult<()> {
         "VERSION",
         option_env!("CARGO_PKG_VERSION").unwrap_or("unknown"),
     )?;
+    m.add("STARLARK_RUST_VERSION", "0.12.0")?; // TODO: query this from Cargo
     m.add_class::<codemap::PyCodeMap>()?;
     m.add_class::<codemap::PyFileSpan>()?;
     m.add_class::<codemap::PyPos>()?;

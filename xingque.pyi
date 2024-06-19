@@ -1,6 +1,7 @@
 from typing import Callable, Iterable, Iterator, Protocol, Self
 
 VERSION: str
+STARLARK_RUST_VERSION: str
 
 # starlark::codemap
 
