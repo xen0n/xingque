@@ -1,4 +1,4 @@
-# 星雀 `xingque` :sparkles::bird:
+# 星雀 `xingque` ✨🐦
 
 Yet another Python binding to [`starlark-rust`][starlark-rust], exposing the
 [Starlark] language to your Python projects. The current version wraps
@@ -35,25 +35,25 @@ this package.
 
 This project as compared to other known bindings:
 
-|Feature|:sparkles::bird:|[`starlark-pyo3`][starlark-pyo3]|[`starlark-go`][starlark-go]|
+|Feature|✨🐦|[`starlark-pyo3`][starlark-pyo3]|[`starlark-go`][starlark-go]|
 |---|---|---|---|
 |License|Apache-2.0|Apache-2.0|Apache-2.0|
-|`py.typed`|:white_check_mark:|:x:|:white_check_mark:|
+|`py.typed`|✅|❌|✅|
 |Binding framework|PyO3|PyO3|cgo|
-|[ABI3] compatibility|:white_check_mark: any Python &ge; 3.8|:x:|:x:|
-|Bundled :sparkles:|Rust, 0.12.x|Rust, 0.10.x|Go, circa March 2023|
-|Data marshalling :snake::arrow_right::sparkles:|:zap: native FFI|:package: via Python `json`|:zap: native FFI|
-|Data marshalling :sparkles::arrow_right::snake:|:zap: native FFI|:package: via Python `json`|:zap: native FFI|
-|Putting opaque :snake: values into :sparkles:|:white_check_mark:|:x:|:boom: crashes|
-|Getting opaque :sparkles: values into :snake:|:white_check_mark:|:x:|:x:|
-|Magic method proxying for opaque :snake: values|:white_check_mark: somewhat complete|:x:|:x:|
-|Magic method proxying for opaque :sparkles: values|:wrench: WIP|:x:|:x:|
-|Invoking :snake: callables from :sparkles:|:white_check_mark:|:x:|:x:|
-|Invoking :sparkles: callables from :snake:|:white_check_mark:|:x:|:x:|
-|Linting|:calendar: planned|:white_check_mark:|:x:|
-|LSP integration|:calendar: planned|:x:|:x:|
-|Profiling & code coverage|:calendar: planned|:x:|:x:|
-|Structured :sparkles: documentation|:calendar: planned|:x:|:x:|
+|[ABI3] compatibility|✅ any Python &ge; 3.8|❌|❌|
+|Bundled ✨|Rust, 0.12.x|Rust, 0.10.x|Go, circa March 2023|
+|Data marshalling 🐍➡️✨|⚡ native FFI|📦 via Python `json`|⚡ native FFI|
+|Data marshalling ✨➡️🐍|⚡ native FFI|📦 via Python `json`|⚡ native FFI|
+|Putting opaque 🐍 values into ✨|✅|❌|💥 crashes|
+|Getting opaque ✨ values into 🐍|✅|❌|❌|
+|Magic method proxying for opaque 🐍 values|✅ somewhat complete|❌|❌|
+|Magic method proxying for opaque ✨ values|🔧 WIP|❌|❌|
+|Invoking 🐍 callables from ✨|✅|❌|❌|
+|Invoking ✨ callables from 🐍|✅|❌|❌|
+|Linting|📆 planned|✅|❌|
+|LSP integration|📆 planned|❌|❌|
+|Profiling & code coverage|📆 planned|❌|❌|
+|Structured ✨ documentation|📆 planned|❌|❌|
 
 [ABI3]: https://docs.python.org/3/c-api/stable.html#stable-abi
 
