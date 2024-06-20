@@ -24,23 +24,49 @@ jobs:
     strategy:
       matrix:
         platform:
+          # CPython
           - runner: ubuntu-latest
             target: x86_64
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: x86
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: aarch64
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: armv7
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: s390x
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: ppc64le
+            interpreter: '3.x'
+          # PyPy
+          - runner: ubuntu-latest
+            target: x86_64
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: x86
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: aarch64
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: x86_64
+            interpreter: pypy3.10
+          - runner: ubuntu-latest
+            target: x86
+            interpreter: pypy3.10
+          - runner: ubuntu-latest
+            target: aarch64
+            interpreter: pypy3.10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.platform.interpreter }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -51,7 +77,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-linux-${{ matrix.platform.target }}
+          name: wheels-linux-${{ matrix.platform.target }}-${{ matrix.platform.interpreter }}
           path: dist
       - name: pytest
         if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
@@ -84,19 +110,43 @@ jobs:
     strategy:
       matrix:
         platform:
+          # CPython
           - runner: ubuntu-latest
             target: x86_64
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: x86
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: aarch64
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: armv7
+            interpreter: '3.x'
+          # PyPy
+          - runner: ubuntu-latest
+            target: x86_64
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: x86
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: aarch64
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: x86_64
+            interpreter: pypy3.10
+          - runner: ubuntu-latest
+            target: x86
+            interpreter: pypy3.10
+          - runner: ubuntu-latest
+            target: aarch64
+            interpreter: pypy3.10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.platform.interpreter }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -107,7 +157,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-musllinux-${{ matrix.platform.target }}
+          name: wheels-musllinux-${{ matrix.platform.target }}-${{ matrix.platform.interpreter }}
           path: dist
       - name: pytest
         if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
@@ -145,15 +195,25 @@ jobs:
     strategy:
       matrix:
         platform:
+          # CPython
           - runner: windows-latest
             target: x64
+            interpreter: '3.x'
           - runner: windows-latest
             target: x86
+            interpreter: '3.x'
+          # PyPy
+          - runner: windows-latest
+            target: x64
+            interpreter: 'pypy3.9'
+          - runner: windows-latest
+            target: x64
+            interpreter: 'pypy3.10'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.platform.interpreter }}
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
@@ -164,7 +224,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-windows-${{ matrix.platform.target }}
+          name: wheels-windows-${{ matrix.platform.target }}-${{ matrix.platform.interpreter }}
           path: dist
       - name: pytest
         if: ${{ !startsWith(matrix.platform.target, 'aarch64') }}
@@ -186,11 +246,15 @@ jobs:
             target: x86_64
           - runner: macos-14
             target: aarch64
+        interpreter:
+          - '3.x'
+          - pypy3.9
+          - pypy3.10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.interpreter }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -200,7 +264,7 @@ jobs:
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.platform.target }}
+          name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.platform.interpreter }}
           path: dist
       - name: pytest
         run: |
