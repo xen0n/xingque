@@ -42,10 +42,9 @@ This project as compared to other known bindings:
 |Binding framework|PyO3|PyO3|cgo|
 |[ABI3] compatibility|✅ any Python &ge; 3.8|❌|❌|
 |Bundled ✨|Rust, 0.12.x|Rust, 0.10.x|Go, circa March 2023|
-|Data marshalling 🐍➡️✨|⚡ native FFI|📦 via Python `json`|⚡ native FFI|
-|Data marshalling ✨➡️🐍|⚡ native FFI|📦 via Python `json`|⚡ native FFI|
-|Putting opaque 🐍 values into ✨|✅|❌|💥 crashes|
-|Getting opaque ✨ values into 🐍|✅|❌|❌|
+|Data marshalling|⚡ native FFI|📦 via Python `json`|⚡ native FFI|
+|Accessing opaque 🐍 values from ✨|✅|❌|💥 crashes|
+|Accessing opaque ✨ values from 🐍|✅|❌|❌|
 |Magic method proxying for opaque 🐍 values|✅ somewhat complete|❌|❌|
 |Magic method proxying for opaque ✨ values|🔧 WIP|❌|❌|
 |Invoking 🐍 callables from ✨|✅|❌|❌|
