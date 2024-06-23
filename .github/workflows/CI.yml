@@ -71,7 +71,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '' }}
           sccache: 'true'
           manylinux: auto
       - name: Upload wheels
@@ -84,13 +84,14 @@ jobs:
         shell: bash
         run: |
           set -e
+          which python3
           python3 -m venv .venv
           source .venv/bin/activate
           pip install xingque --no-index --find-links dist --force-reinstall
           pip install pytest
           pytest
       - name: pytest
-        if: ${{ !startsWith(matrix.platform.target, 'x86') && matrix.platform.target != 'ppc64' }}
+        if: ${{ !startsWith(matrix.platform.target, 'x86') && matrix.platform.target != 'ppc64' && !startsWith(matrix.platform.interpreter, 'pypy') }}
         uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.platform.target }}
@@ -151,7 +152,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '' }}
           sccache: 'true'
           manylinux: musllinux_1_2
       - name: Upload wheels
@@ -184,6 +185,7 @@ jobs:
             apk add py3-virtualenv
           run: |
             set -e
+            which python3
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install pytest
@@ -219,7 +221,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist
+          args: --release --out dist  # It seems unneeded to force interpreter on Windows
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -231,6 +233,7 @@ jobs:
         shell: bash
         run: |
           set -e
+          which python3
           python3 -m venv .venv
           source .venv/Scripts/activate
           pip install xingque --no-index --find-links dist --force-reinstall
@@ -259,16 +262,17 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist
+          args: --release --out dist ${{ startsWith(matrix.interpreter, 'pypy') && format('--interpreter {0}', matrix.interpreter) || '' }}
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.platform.interpreter }}
+          name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.interpreter }}
           path: dist
       - name: pytest
         run: |
           set -e
+          which python3
           python3 -m venv .venv
           source .venv/bin/activate
           pip install xingque --no-index --find-links dist --force-reinstall
