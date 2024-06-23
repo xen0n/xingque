@@ -35,7 +35,9 @@ changelog = "https://github.com/xen0n/xingque/blob/main/CHANGELOG.md"
 
 [tool.maturin]
 profile = "release"
-features = ["pyo3/extension-module", "pyo3/abi3", "pyo3/abi3-py38"]
+# ABI3 features are not put here; these are specified via CLI arguments in CI.
+# Tests fail on PyPy3.10 otherwise (3.14 becomes 3 in the round-trip smoke test)
+features = ["pyo3/extension-module"]
 
 [tool.pytest.ini_options]
 addopts = [

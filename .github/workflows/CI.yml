@@ -71,7 +71,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '' }}
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '-F pyo3/abi3,pyo3/abi3-py38' }}
           sccache: 'true'
           manylinux: auto
       - name: Upload wheels
@@ -152,7 +152,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '' }}
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '-F pyo3/abi3,pyo3/abi3-py38' }}
           sccache: 'true'
           manylinux: musllinux_1_2
       - name: Upload wheels
@@ -224,7 +224,9 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist  # It seems unneeded to force interpreter on Windows
+          # It seems unneeded to force interpreter on Windows, but we need abi3
+          # for non-PyPy
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && '' || '-F pyo3/abi3,pyo3/abi3-py38' }}
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -265,7 +267,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist ${{ startsWith(matrix.interpreter, 'pypy') && format('--interpreter {0}', matrix.interpreter) || '' }}
+          args: --release --out dist ${{ startsWith(matrix.interpreter, 'pypy') && format('--interpreter {0}', matrix.interpreter) || '-F pyo3/abi3,pyo3/abi3-py38' }}
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4

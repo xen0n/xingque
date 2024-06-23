@@ -16,5 +16,5 @@ crate-type = ["cdylib"]
 allocative = "0.3.3"
 anyhow = "1.0.86"
 num-bigint = "0.4.5"
-pyo3 = { version = "0.22.0", features = ["abi3", "abi3-py38", "anyhow", "multiple-pymethods", "num-bigint"] }
+pyo3 = { version = "0.22.0", features = ["anyhow", "multiple-pymethods", "num-bigint"] }
 starlark = "0.12.0"
