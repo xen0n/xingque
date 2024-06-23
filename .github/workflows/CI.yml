@@ -169,6 +169,8 @@ jobs:
           run: |
             set -e
             apk add py3-pip py3-virtualenv
+            which python3
+            which pypy3 || true
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install xingque --no-index --find-links dist --force-reinstall
@@ -186,6 +188,7 @@ jobs:
           run: |
             set -e
             which python3
+            which pypy3 || true
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install pytest
