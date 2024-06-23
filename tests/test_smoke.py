@@ -32,13 +32,12 @@ def test_load_stmt():
     to Python."""
 
     def get_source(file: str) -> str:
-        match file:
-            case "a.star":
-                return "a = 7"
-            case "b.star":
-                return "b = 6"
-            case _:
-                return """
+        if file == "a.star":
+            return "a = 7"
+        elif file == "b.star":
+            return "b = 6"
+        else:
+            return """
 load('a.star', 'a')
 load('b.star', 'b')
 ab = a * b
