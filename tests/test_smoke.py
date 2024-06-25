@@ -108,6 +108,14 @@ def test_magic_method_forwarding():
             self.methods_called.append(f"setattr:{name}")
             self.setattr_value[name] = value
 
+        def __pos__(self) -> str:
+            self.methods_called.append("pos")
+            return f"pos"
+
+        def __neg__(self) -> str:
+            self.methods_called.append("neg")
+            return f"neg"
+
         def __add__(self, rhs: int) -> str:
             self.methods_called.append("add")
             return f"add:{rhs}"
@@ -123,6 +131,14 @@ def test_magic_method_forwarding():
         def __truediv__(self, rhs: int) -> str:
             self.methods_called.append("truediv")
             return f"truediv:{rhs}"
+
+        def __floordiv__(self, rhs: int) -> str:
+            self.methods_called.append("floordiv")
+            return f"floordiv:{rhs}"
+
+        def __mod__(self, rhs: int) -> str:
+            self.methods_called.append("mod")
+            return f"mod:{rhs}"
 
         def __lshift__(self, rhs: int) -> str:
             self.methods_called.append("lshift")
@@ -144,6 +160,10 @@ def test_magic_method_forwarding():
             self.methods_called.append("xor")
             return f"xor:{rhs}"
 
+        def __invert__(self) -> str:
+            self.methods_called.append("invert")
+            return f"invert"
+
     text = """
 to_bool = bool(foo)
 eq = foo == 123
@@ -163,18 +183,21 @@ has_attr1 = hasattr(foo, 'methods_called')
 has_attr2 = hasattr(foo, 'nonexistent')
 dir_attr = dir(foo)
 
+pos = +foo
+neg = -foo
+
 add = foo + 123
 sub = foo - 123
 mul = foo * 123
 div = foo / 123
+floordiv = foo // 123
+mod = foo % 123
 lshift = foo << 123
 rshift = foo >> 123
 bitand = foo & 123
 bitor = foo | 123
 bitxor = foo ^ 123
-
-# TODO: not exposed by pyo3
-#mod = foo % 123
+bitnot = ~foo
 """
 
     recorder = Foo()
@@ -202,15 +225,20 @@ bitxor = foo ^ 123
         "getattr:test_get_attr",
         "setattr:test_set_attr",
         "getattr:nonexistent",
+        "pos",
+        "neg",
         "add",
         "sub",
         "mul",
         "truediv",
+        "floordiv",
+        "mod",
         "lshift",
         "rshift",
         "and",
         "or",
         "xor",
+        "invert",
     ]
     assert not m.get("to_bool")
     assert m.get("eq")
@@ -229,12 +257,17 @@ bitxor = foo ^ 123
     assert m.get("has_attr1")
     assert not m.get("has_attr2")
     assert m.get("dir_attr") == dir(recorder)
+    assert m.get("pos") == "pos"
+    assert m.get("neg") == "neg"
     assert m.get("add") == "add:123"
     assert m.get("sub") == "sub:123"
     assert m.get("mul") == "mul:123"
     assert m.get("div") == "truediv:123"
+    assert m.get("floordiv") == "floordiv:123"
+    assert m.get("mod") == "mod:123"
     assert m.get("lshift") == "lshift:123"
     assert m.get("rshift") == "rshift:123"
     assert m.get("bitand") == "and:123"
     assert m.get("bitor") == "or:123"
     assert m.get("bitxor") == "xor:123"
+    assert m.get("bitnot") == "invert"

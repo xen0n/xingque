@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 use starlark::values::function::NativeFunction;
 
-#[pyclass(module = "xingque", name = "_SlNativeFunction")]
+#[pyclass(module = "xingque", name = "_SlNativeFunction", frozen)]
 pub(crate) struct PySlNativeFunction(&'static NativeFunction);
 
 impl PySlNativeFunction {

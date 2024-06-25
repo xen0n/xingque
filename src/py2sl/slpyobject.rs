@@ -194,19 +194,25 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
         result.map_err(sl_value_err_from_py)
     }
 
-    // TODO: plus/minus only wrappable after
-    // https://github.com/PyO3/pyo3/commit/37a5f6a94e9dab31575b016a4295fb94322b9aba
-    // gets shipped in a published tag
-    /*
     fn plus(&self, heap: &'v Heap) -> starlark::Result<Value<'v>> {
-        let result = Python::with_gil(|py| {
+        Python::with_gil(|py| {
             let inner = self.0.bind(py);
-            inner.pos()
-        });
-
-        result.map_err(sl_value_err_from_py)
+            match inner.pos() {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
     }
-    */
+
+    fn minus(&self, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            match inner.neg() {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
+    }
 
     fn get_attr(&self, attribute: &str, heap: &'v Heap) -> Option<Value<'v>> {
         Python::with_gil(|py| {
@@ -234,6 +240,7 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
             let inner = self.0.bind(py);
             inner
                 .dir()
+                .unwrap() // no way to propagate error with this interface
                 .into_iter()
                 .map(|x| x.extract::<String>().unwrap())
                 .collect()
@@ -305,7 +312,33 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
         })
     }
 
-    // TODO: percent & floor_div
+    fn percent(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Err(sl_value_err_from_py(e)),
+            };
+            match inner.rem(rhs.bind(py)) {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
+    }
+
+    fn floor_div(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            let rhs = match py_from_sl_value(py, rhs) {
+                Ok(rhs) => rhs,
+                Err(e) => return Err(sl_value_err_from_py(e)),
+            };
+            match inner.floor_div(rhs.bind(py)) {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
+    }
 
     fn bit_and(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
         Python::with_gil(|py| {
@@ -349,7 +382,15 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
         })
     }
 
-    // TODO: bit_not
+    fn bit_not(&self, heap: &'v Heap) -> starlark::Result<Value<'v>> {
+        Python::with_gil(|py| {
+            let inner = self.0.bind(py);
+            match inner.bitnot() {
+                Ok(result) => Ok(sl_value_from_py(&result, heap)),
+                Err(e) => Err(sl_value_err_from_py(e)),
+            }
+        })
+    }
 
     fn left_shift(&self, rhs: Value<'v>, heap: &'v Heap) -> starlark::Result<Value<'v>> {
         Python::with_gil(|py| {

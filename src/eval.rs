@@ -43,6 +43,7 @@ impl PyEvaluator {
 #[pymethods]
 impl PyEvaluator {
     #[new]
+    #[pyo3(signature = (module = None))]
     fn py_new(py: Python, module: Option<Bound<'_, PyModule>>) -> PyResult<Self> {
         let module =
             module.map_or_else(|| Bound::new(py, PyModule::from(Module::new())), Result::Ok)?;
@@ -92,7 +93,7 @@ impl PyEvaluator {
 
     fn set_loader(&mut self, py: Python, loader: &Bound<'_, PyAny>) -> PyResult<()> {
         self.ensure_module_available(py)?;
-        self.2.set(loader.as_unbound().clone());
+        self.2.set(loader.clone().unbind());
         let ptr: &'_ dyn FileLoader = &self.2;
         // Safety: actually the wrapper object and the evaluator are identically
         // scoped
@@ -131,7 +132,7 @@ impl PyEvaluator {
     #[getter]
     fn module(&self, py: Python) -> PyResult<Py<PyModule>> {
         self.ensure_module_available(py)?;
-        Ok(self.1.clone())
+        Ok(self.1.clone_ref(py))
     }
 
     // TODO: frozen_heap

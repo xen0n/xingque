@@ -5,31 +5,21 @@ use pyo3::prelude::*;
 use starlark::syntax::{AstLoad, AstModule, Dialect, DialectTypes};
 
 use crate::codemap::{PyFileSpan, PySpan};
-use crate::hash_utils::TrivialPyHash;
 use crate::repr_utils::{PyReprBool, PyReprDialectTypes};
 
 #[pyclass(
     module = "xingque",
     name = "DialectTypes",
     rename_all = "SCREAMING_SNAKE_CASE",
-    frozen
+    frozen,
+    eq,
+    hash
 )]
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum PyDialectTypes {
     Disable,
     ParseOnly,
     Enable,
-}
-
-#[pymethods]
-impl PyDialectTypes {
-    fn __hash__(&self) -> u64 {
-        self.trivial_py_hash()
-    }
-
-    fn __eq__(&self, other: &Self) -> bool {
-        self == other
-    }
 }
 
 impl From<PyDialectTypes> for DialectTypes {
@@ -145,6 +135,16 @@ impl PyDialect {
     }
 
     #[new]
+    #[pyo3(signature = (
+        enable_def = false,
+        enable_lambda = false,
+        enable_load = false,
+        enable_keyword_only_arguments = false,
+        enable_types = None,
+        enable_load_reexport = false,
+        enable_top_level_stmt = false,
+        enable_f_strings = false,
+    ))]
     fn py_new(
         enable_def: Option<bool>,
         enable_lambda: Option<bool>,
@@ -249,7 +249,7 @@ impl PyAstModule {
     }
 }
 
-#[pyclass(module = "xingque", name = "AstLoad")]
+#[pyclass(module = "xingque", name = "AstLoad", frozen)]
 pub(crate) struct PyAstLoad {
     /// Span where this load is written
     #[pyo3(get)]

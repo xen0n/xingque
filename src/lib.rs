@@ -3,7 +3,6 @@ use pyo3::prelude::*;
 mod codemap;
 mod environment;
 mod eval;
-mod hash_utils;
 mod py2sl;
 mod repr_utils;
 mod sl2py;

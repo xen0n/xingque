@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use pyo3::{prelude::*, types::PyTuple};
 use starlark::values::{FrozenValue, Heap, Value};
 
-#[pyclass(module = "xingque", name = "FrozenValue")]
+#[pyclass(module = "xingque", name = "FrozenValue", frozen)]
 pub(crate) struct PyFrozenValue(pub(crate) FrozenValue);
 
 impl From<FrozenValue> for PyFrozenValue {
@@ -49,7 +49,7 @@ impl PyHeapSummary {
 }
 
 /// A heap on which `Value`s can be allocated.
-#[pyclass(module = "xingque", name = "Heap")]
+#[pyclass(module = "xingque", name = "Heap", frozen)]
 pub(crate) struct PyHeap(Heap);
 
 impl From<Heap> for PyHeap {
@@ -92,7 +92,7 @@ impl PyHeap {
     }
 }
 
-#[pyclass(module = "xingque", name = "Value")]
+#[pyclass(module = "xingque", name = "Value", frozen)]
 pub(crate) struct PyValue(pub(crate) Value<'static>);
 
 impl<'v> From<Value<'v>> for PyValue {
