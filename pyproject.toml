@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "xingque"
-version = "0.1.0"
+version = "0.2.0"
 description = "Yet another typed Python binding to starlark-rust"
 readme = "README.md"
 requires-python = ">=3.8"
