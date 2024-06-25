@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use pyo3::{exceptions::PyValueError, prelude::*};
 use starlark::codemap::{
     CodeMap, FileSpan, Pos, ResolvedFileLine, ResolvedFileSpan, ResolvedPos, ResolvedSpan, Span,
@@ -61,10 +63,10 @@ impl From<ResolvedPos> for PyResolvedPos {
 }
 
 impl PyResolvedPos {
-    fn repr(&self, class_name: Option<&str>) -> String {
+    fn repr(&self, class_name: Option<Cow<'_, str>>) -> String {
         format!(
             "{}(line={}, column={})",
-            class_name.unwrap_or("ResolvedPos"),
+            class_name.unwrap_or(Cow::Borrowed("ResolvedPos")),
             self.0.line,
             self.0.column
         )
@@ -79,9 +81,9 @@ impl PyResolvedPos {
     }
 
     fn __repr__(slf: &Bound<'_, Self>) -> PyResult<String> {
-        let class_name = slf.get_type().qualname()?;
+        let class_name = slf.get_type().qualname()?.to_string();
         let me = slf.borrow();
-        Ok(me.repr(Some(&class_name)))
+        Ok(me.repr(Some(Cow::Owned(class_name))))
     }
 
     fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {

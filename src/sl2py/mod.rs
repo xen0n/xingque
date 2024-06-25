@@ -52,7 +52,7 @@ pub(crate) fn py_from_sl_frozen_value(py: Python<'_>, sl: FrozenValue) -> PyResu
     } else if let Some(x) = sl.downcast_frozen_ref::<SlPyObject>() {
         Ok(x.0.clone_ref(py))
     } else {
-        Ok(Py::new(py, PyFrozenValue::from(sl))?.as_any().clone())
+        Ok(Py::new(py, PyFrozenValue::from(sl))?.into_any())
     }
 }
 
@@ -94,7 +94,7 @@ pub(crate) fn py_from_sl_value(py: Python<'_>, sl: Value<'_>) -> PyResult<PyObje
     } else if let Some(x) = sl.downcast_ref::<SlPyObject>() {
         Ok(x.0.clone_ref(py))
     } else {
-        Ok(Py::new(py, PyValue::from(sl))?.as_any().clone())
+        Ok(Py::new(py, PyValue::from(sl))?.into_any())
     }
 }
 
