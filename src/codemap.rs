@@ -60,6 +60,17 @@ impl From<ResolvedPos> for PyResolvedPos {
     }
 }
 
+impl PyResolvedPos {
+    fn repr(&self, class_name: Option<&str>) -> String {
+        format!(
+            "{}(line={}, column={})",
+            class_name.unwrap_or("ResolvedPos"),
+            self.0.line,
+            self.0.column
+        )
+    }
+}
+
 #[pymethods]
 impl PyResolvedPos {
     #[new]
@@ -71,15 +82,6 @@ impl PyResolvedPos {
         let class_name = slf.get_type().qualname()?;
         let me = slf.borrow();
         Ok(me.repr(Some(&class_name)))
-    }
-
-    fn repr(&self, class_name: Option<&str>) -> String {
-        format!(
-            "{}(line={}, column={})",
-            class_name.unwrap_or("ResolvedPos"),
-            self.0.line,
-            self.0.column
-        )
     }
 
     fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {

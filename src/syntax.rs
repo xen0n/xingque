@@ -145,6 +145,16 @@ impl PyDialect {
     }
 
     #[new]
+    #[pyo3(signature = (
+        enable_def = false,
+        enable_lambda = false,
+        enable_load = false,
+        enable_keyword_only_arguments = false,
+        enable_types = None,
+        enable_load_reexport = false,
+        enable_top_level_stmt = false,
+        enable_f_strings = false,
+    ))]
     fn py_new(
         enable_def: Option<bool>,
         enable_lambda: Option<bool>,

@@ -43,6 +43,7 @@ impl PyEvaluator {
 #[pymethods]
 impl PyEvaluator {
     #[new]
+    #[pyo3(signature = (module = None))]
     fn py_new(py: Python, module: Option<Bound<'_, PyModule>>) -> PyResult<Self> {
         let module =
             module.map_or_else(|| Bound::new(py, PyModule::from(Module::new())), Result::Ok)?;
