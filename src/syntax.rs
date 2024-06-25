@@ -5,31 +5,21 @@ use pyo3::prelude::*;
 use starlark::syntax::{AstLoad, AstModule, Dialect, DialectTypes};
 
 use crate::codemap::{PyFileSpan, PySpan};
-use crate::hash_utils::TrivialPyHash;
 use crate::repr_utils::{PyReprBool, PyReprDialectTypes};
 
 #[pyclass(
     module = "xingque",
     name = "DialectTypes",
     rename_all = "SCREAMING_SNAKE_CASE",
-    frozen
+    frozen,
+    eq,
+    hash
 )]
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum PyDialectTypes {
     Disable,
     ParseOnly,
     Enable,
-}
-
-#[pymethods]
-impl PyDialectTypes {
-    fn __hash__(&self) -> u64 {
-        self.trivial_py_hash()
-    }
-
-    fn __eq__(&self, other: &Self) -> bool {
-        self == other
-    }
 }
 
 impl From<PyDialectTypes> for DialectTypes {

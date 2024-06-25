@@ -3,7 +3,6 @@ use pyo3::prelude::*;
 use starlark::environment::{FrozenModule, Globals, GlobalsBuilder, LibraryExtension, Module};
 use starlark::values::{FrozenStringValue, FrozenValue};
 
-use crate::hash_utils::TrivialPyHash;
 use crate::py2sl::{self, sl_frozen_value_from_py};
 use crate::sl2py::{self, py_from_sl_frozen_value};
 
@@ -12,7 +11,9 @@ use crate::sl2py::{self, py_from_sl_frozen_value};
     module = "xingque",
     name = "LibraryExtension",
     rename_all = "SCREAMING_SNAKE_CASE",
-    frozen
+    frozen,
+    eq,
+    hash
 )]
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub(crate) enum PyLibraryExtension {
@@ -96,16 +97,6 @@ impl From<PyLibraryExtension> for LibraryExtension {
     }
 }
 
-#[pymethods]
-impl PyLibraryExtension {
-    fn __hash__(&self) -> u64 {
-        self.trivial_py_hash()
-    }
-
-    fn __eq__(&self, other: &Self) -> bool {
-        self == other
-    }
-}
 
 #[pyclass(module = "xingque", name = "Globals")]
 pub(crate) struct PyGlobals(pub(crate) Globals);
