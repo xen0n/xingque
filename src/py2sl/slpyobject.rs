@@ -240,6 +240,7 @@ impl<'v> StarlarkValue<'v> for SlPyObject {
             let inner = self.0.bind(py);
             inner
                 .dir()
+                .unwrap() // no way to propagate error with this interface
                 .into_iter()
                 .map(|x| x.extract::<String>().unwrap())
                 .collect()
