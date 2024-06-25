@@ -249,7 +249,7 @@ impl PyAstModule {
     }
 }
 
-#[pyclass(module = "xingque", name = "AstLoad")]
+#[pyclass(module = "xingque", name = "AstLoad", frozen)]
 pub(crate) struct PyAstLoad {
     /// Span where this load is written
     #[pyo3(get)]

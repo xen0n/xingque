@@ -97,8 +97,7 @@ impl From<PyLibraryExtension> for LibraryExtension {
     }
 }
 
-
-#[pyclass(module = "xingque", name = "Globals")]
+#[pyclass(module = "xingque", name = "Globals", frozen)]
 pub(crate) struct PyGlobals(pub(crate) Globals);
 
 impl From<Globals> for PyGlobals {
@@ -424,7 +423,7 @@ impl PySubGlobalsBuilder {
     }
 }
 
-#[pyclass(module = "xingque", name = "FrozenModule")]
+#[pyclass(module = "xingque", name = "FrozenModule", frozen)]
 #[derive(Clone)]
 pub(crate) struct PyFrozenModule(pub(crate) FrozenModule);
 

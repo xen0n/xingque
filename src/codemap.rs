@@ -53,7 +53,7 @@ impl<'py> FromPyObject<'py> for PyPos {
     }
 }
 
-#[pyclass(module = "xingque", name = "ResolvedPos")]
+#[pyclass(module = "xingque", name = "ResolvedPos", frozen)]
 pub(crate) struct PyResolvedPos(ResolvedPos);
 
 impl From<ResolvedPos> for PyResolvedPos {
@@ -106,7 +106,7 @@ impl PyResolvedPos {
     }
 }
 
-#[pyclass(module = "xingque", name = "ResolvedSpan")]
+#[pyclass(module = "xingque", name = "ResolvedSpan", frozen)]
 pub(crate) struct PyResolvedSpan(ResolvedSpan);
 
 impl From<ResolvedSpan> for PyResolvedSpan {
@@ -172,7 +172,7 @@ impl PyResolvedSpan {
     }
 }
 
-#[pyclass(module = "xingque", name = "Span")]
+#[pyclass(module = "xingque", name = "Span", frozen)]
 pub(crate) struct PySpan(pub(crate) Span);
 
 impl From<Span> for PySpan {
@@ -246,7 +246,7 @@ impl PySpan {
     }
 }
 
-#[pyclass(module = "xingque", name = "CodeMap")]
+#[pyclass(module = "xingque", name = "CodeMap", frozen)]
 pub(crate) struct PyCodeMap(CodeMap);
 
 impl From<CodeMap> for PyCodeMap {
@@ -320,7 +320,7 @@ impl PyCodeMap {
     }
 }
 
-#[pyclass(module = "xingque", name = "FileSpan")]
+#[pyclass(module = "xingque", name = "FileSpan", frozen)]
 #[derive(Clone)]
 pub(crate) struct PyFileSpan(FileSpan);
 
