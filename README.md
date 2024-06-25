@@ -81,15 +81,10 @@ are in fact just references to the original `object` being `set`.
 This means you can pass your Python objects and callables into Starlark, and use
 them largely as if the runtime is still Python.
 
-Due to missing API in PyO3, Python to Starlark proxying of some operators are
-not supported right now. These are:
+Due to missing API in Starlark and/or PyO3, there can be some operators for
+whose Python to Starlark proxying is not supported right now. Currently this is:
 
-* unary plus: `+x` i.e. `__pos__`
-* unary minus: `-x` i.e. `__neg__`
-* unary invert: `~x` i.e. `__invert__`
-* absolute value: `abs(x)` i.e. `__abs__`
-* floor division: `x // y` i.e. `__floordiv__`
-* modulus: `x % y` i.e. `__pow__`
+* absolute value: Starlark `abs(x)`, Python `__abs__`: missing `StarlarkValue` trait method
 
 There are other features that are not implemented right now, but I have plans
 to support in a future version. These are:
