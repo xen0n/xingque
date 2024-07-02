@@ -43,6 +43,8 @@ mod xingque {
     #[pymodule_export]
     use errors::PyFrame;
     #[pymodule_export]
+    use eval::PyCallStack;
+    #[pymodule_export]
     use eval::PyDictFileLoader;
     #[pymodule_export]
     use eval::PyEvaluator;

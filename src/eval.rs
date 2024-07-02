@@ -6,13 +6,38 @@ use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
 use starlark::environment::{FrozenModule, Module};
-use starlark::eval::{Evaluator, FileLoader};
+use starlark::errors::Frame;
+use starlark::eval::{CallStack, Evaluator, FileLoader};
 use starlark::PrintHandler;
 
 use crate::codemap::PyFileSpan;
 use crate::environment::{PyFrozenModule, PyGlobals, PyModule};
+use crate::errors::PyFrame;
 use crate::syntax::PyAstModule;
 use crate::{py2sl, sl2py};
+
+#[pyclass(module = "xingque", name = "CallStack")]
+pub(crate) struct PyCallStack(CallStack);
+
+impl From<CallStack> for PyCallStack {
+    fn from(value: CallStack) -> Self {
+        Self(value)
+    }
+}
+
+#[pymethods]
+impl PyCallStack {
+    #[getter]
+    fn frames(&self) -> Vec<PyFrame> {
+        self.0.frames.clone().into_iter().map(Frame::into).collect()
+    }
+
+    fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    // into_frames not needed because one doesn't consume values in Python
+}
 
 // it seems the Evaluator contains many thread-unsafe states
 #[pyclass(module = "xingque", name = "Evaluator", unsendable)]
