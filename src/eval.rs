@@ -7,6 +7,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
 use starlark::environment::{FrozenModule, Module};
 use starlark::eval::{Evaluator, FileLoader};
+use starlark::PrintHandler;
 
 use crate::codemap::PyFileSpan;
 use crate::environment::{PyFrozenModule, PyGlobals, PyModule};
@@ -20,6 +21,7 @@ pub(crate) struct PyEvaluator(
     // this reference is necessary for memory safety
     #[allow(dead_code)] Py<PyModule>,
     PyObjectFileLoader,
+    PyObjectPrintHandler,
 );
 
 impl PyEvaluator {
@@ -32,6 +34,7 @@ impl PyEvaluator {
             Evaluator::new(module),
             module_ref,
             PyObjectFileLoader::default(),
+            PyObjectPrintHandler::default(),
         ))
     }
 
@@ -130,7 +133,24 @@ impl PyEvaluator {
         Ok(self.0.call_stack_top_location().map(PyFileSpan::from))
     }
 
-    // TODO: set_print_handler
+    fn set_print_handler(&mut self, py: Python, handler: &Bound<'_, PyAny>) -> PyResult<()> {
+        self.ensure_module_available(py)?;
+        let handler: Option<PyObject> = if handler.is_none() {
+            None
+        } else {
+            Some(handler.clone().unbind())
+        };
+        self.3.set(handler);
+
+        let ptr: &'_ dyn PrintHandler = &self.3;
+        // Safety: actually the wrapper object and the evaluator are identically
+        // scoped
+        let ptr: &'static dyn PrintHandler = unsafe { ::core::mem::transmute(ptr) };
+        self.0.set_print_handler(ptr);
+
+        Ok(())
+    }
+
     // TODO: heap
 
     #[getter]
@@ -268,5 +288,40 @@ impl FileLoader for PyDictFileLoader {
             "DictFileLoader does not know the module `{}`",
             path
         ))
+    }
+}
+
+// it would be good if https://github.com/PyO3/pyo3/issues/1190 is implemented
+// so we could have stronger typing
+// but currently duck-typing isn't bad anyway
+// this is why we don't declare this as a pyclass right now
+#[derive(Debug, Default)]
+pub(crate) struct PyObjectPrintHandler(Option<PyObject>);
+
+impl PyObjectPrintHandler {
+    fn set(&mut self, obj: Option<PyObject>) {
+        self.0 = obj;
+    }
+}
+
+impl PrintHandler for PyObjectPrintHandler {
+    fn println(&self, text: &str) -> anyhow::Result<()> {
+        if let Some(inner) = self.0.as_ref() {
+            Python::with_gil(|py| {
+                // duck-typing
+                // call the wrapped PyObject's "println" method with the path
+                // and ignore the return value
+                let name = intern!(py, "println");
+                let args = PyTuple::new_bound(py, &[text]);
+                inner.call_method_bound(py, name, args, None)?;
+                Ok(())
+            })
+        } else {
+            // Duplicate of starlark's stdlib::extra::StderrPrintHandler (the default
+            // print handler), because it is unfortunately pub(crate), but the
+            // logic is trivial.
+            eprintln!("{}", text);
+            Ok(())
+        }
     }
 }
