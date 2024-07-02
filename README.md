@@ -1,5 +1,13 @@
 # 星雀 `xingque` ✨🐦
 
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/xen0n/xingque/CI.yml)
+![PyPI - License](https://img.shields.io/pypi/l/xingque)
+![PyPI - Version](https://img.shields.io/pypi/v/xingque)
+![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fxen0n%2Fxingque%2Fmain%2Fpyproject.toml)
+![PyPI - Implementation](https://img.shields.io/pypi/implementation/xingque)
+![PyPI - Format](https://img.shields.io/pypi/format/xingque)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/xingque)
+
 Yet another Python binding to [`starlark-rust`][starlark-rust], exposing the
 [Starlark] language to your Python projects. The current version wraps
 `starlark-rust` version 0.12.x.
