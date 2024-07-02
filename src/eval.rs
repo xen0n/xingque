@@ -145,8 +145,15 @@ impl PyEvaluator {
         Ok(())
     }
 
-    // TODO: call_stack
-    // TODO: call_stack_top_frame
+    fn call_stack(&self, py: Python) -> PyResult<PyCallStack> {
+        self.ensure_module_available(py)?;
+        Ok(self.0.call_stack().into())
+    }
+
+    fn call_stack_top_frame(&self, py: Python) -> PyResult<Option<PyFrame>> {
+        self.ensure_module_available(py)?;
+        Ok(self.0.call_stack_top_frame().map(Frame::into))
+    }
 
     fn call_stack_count(&self, py: Python) -> PyResult<usize> {
         self.ensure_module_available(py)?;
