@@ -50,7 +50,11 @@ impl PyEvaluator {
         Self::new(module)
     }
 
-    // TODO: disable_gc
+    fn disable_gc(&mut self, py: Python) -> PyResult<()> {
+        self.ensure_module_available(py)?;
+        self.0.disable_gc();
+        Ok(())
+    }
 
     fn eval_statements(
         &mut self,
