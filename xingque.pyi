@@ -231,7 +231,12 @@ class Evaluator:
     # TODO: set_module_variable_at_some_point (is this okay to expose?)
     def set_max_callstack_size(self, stack_size: int) -> None: ...
     def eval_module(self, ast: AstModule, globals: Globals) -> object: ...
-    def eval_function(self, function: object, *args, **kwargs) -> object: ...
+    def eval_function(
+        self,
+        function: object,
+        *args: object,
+        **kwargs: object,
+    ) -> object: ...
 
 # starlark::syntax
 
