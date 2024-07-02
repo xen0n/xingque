@@ -2,6 +2,7 @@ use pyo3::prelude::*;
 
 mod codemap;
 mod environment;
+mod errors;
 mod eval;
 mod py2sl;
 mod repr_utils;
@@ -39,6 +40,8 @@ mod xingque {
     use environment::PyLibraryExtension;
     #[pymodule_export]
     use environment::PyModule;
+    #[pymodule_export]
+    use errors::PyFrame;
     #[pymodule_export]
     use eval::PyDictFileLoader;
     #[pymodule_export]

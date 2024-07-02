@@ -197,6 +197,15 @@ class Module:
     def set(self, name: str, value: object) -> None: ...
     def freeze(self) -> FrozenModule: ...
 
+# starlark::errors
+
+class Frame:
+    @property
+    def name(self) -> str: ...
+    @property
+    def location(self) -> FileSpan | None: ...
+    # TODO: write_two_lines
+
 # starlark::eval
 
 class _FileLoader(Protocol):
