@@ -53,7 +53,9 @@ impl<'py> FromPyObject<'py> for PyPos {
     }
 }
 
-#[pyclass(module = "xingque", name = "ResolvedPos", frozen)]
+#[pyclass(module = "xingque", name = "ResolvedPos", eq, hash, frozen)]
+#[repr(transparent)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub(crate) struct PyResolvedPos(ResolvedPos);
 
 impl From<ResolvedPos> for PyResolvedPos {
@@ -86,15 +88,6 @@ impl PyResolvedPos {
         Ok(me.repr(Some(Cow::Owned(class_name))))
     }
 
-    fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
-        // TODO: handle Tuple[int, int]
-        if let Ok(other) = other.downcast::<PyResolvedPos>() {
-            self.0 == other.borrow().0
-        } else {
-            false
-        }
-    }
-
     #[getter]
     fn line(&self) -> usize {
         self.0.line
@@ -106,7 +99,9 @@ impl PyResolvedPos {
     }
 }
 
-#[pyclass(module = "xingque", name = "ResolvedSpan", frozen)]
+#[pyclass(module = "xingque", name = "ResolvedSpan", eq, hash, frozen)]
+#[repr(transparent)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub(crate) struct PyResolvedSpan(ResolvedSpan);
 
 impl From<ResolvedSpan> for PyResolvedSpan {
@@ -135,15 +130,6 @@ impl PyResolvedSpan {
             me.begin().repr(None),
             me.end().repr(None)
         ))
-    }
-
-    fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
-        // TODO: handle Tuple[int, int]
-        if let Ok(other) = other.downcast::<PyResolvedSpan>() {
-            self.0 == other.borrow().0
-        } else {
-            false
-        }
     }
 
     #[getter]
@@ -366,7 +352,9 @@ impl PyFileSpan {
     }
 }
 
-#[pyclass(module = "xingque", name = "ResolvedFileLine")]
+#[pyclass(module = "xingque", name = "ResolvedFileLine", eq, hash, frozen)]
+#[repr(transparent)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub(crate) struct PyResolvedFileLine(ResolvedFileLine);
 
 impl From<ResolvedFileLine> for PyResolvedFileLine {
@@ -391,35 +379,20 @@ impl PyResolvedFileLine {
         ))
     }
 
-    fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
-        match other.downcast::<PyResolvedFileLine>() {
-            Ok(other) => self.0 == other.borrow().0,
-            Err(_) => false,
-        }
-    }
-
     #[getter]
     fn get_file(&self) -> &str {
         &self.0.file
-    }
-
-    #[setter]
-    fn set_file(&mut self, x: String) {
-        self.0.file = x;
     }
 
     #[getter]
     fn get_line(&self) -> usize {
         self.0.line
     }
-
-    #[setter]
-    fn set_line(&mut self, x: usize) {
-        self.0.line = x;
-    }
 }
 
-#[pyclass(module = "xingque", name = "ResolvedFileSpan")]
+#[pyclass(module = "xingque", name = "ResolvedFileSpan", eq, hash, frozen)]
+#[repr(transparent)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub(crate) struct PyResolvedFileSpan(ResolvedFileSpan);
 
 impl From<ResolvedFileSpan> for PyResolvedFileSpan {
@@ -444,31 +417,14 @@ impl PyResolvedFileSpan {
         ))
     }
 
-    fn __eq__(&self, other: &Bound<'_, PyAny>) -> bool {
-        match other.downcast::<PyResolvedFileSpan>() {
-            Ok(other) => self.0 == other.borrow().0,
-            Err(_) => false,
-        }
-    }
-
     #[getter]
     fn get_file(&self) -> &str {
         &self.0.file
     }
 
-    #[setter]
-    fn set_file(&mut self, x: String) {
-        self.0.file = x;
-    }
-
     #[getter]
     fn get_span(&self) -> PyResolvedSpan {
         self.0.span.into()
-    }
-
-    #[setter]
-    fn set_span(&mut self, x: &PyResolvedSpan) {
-        self.0.span = x.0;
     }
 
     fn begin_file_line(&self) -> PyResolvedFileLine {
