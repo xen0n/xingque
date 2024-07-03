@@ -49,6 +49,8 @@ mod xingque {
     #[pymodule_export]
     use eval::PyEvaluator;
     #[pymodule_export]
+    use eval::PyProfileMode;
+    #[pymodule_export]
     use syntax::PyAstModule;
     #[pymodule_export]
     use syntax::PyDialect;

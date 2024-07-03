@@ -255,6 +255,46 @@ class Evaluator:
         **kwargs: object,
     ) -> object: ...
 
+class ProfileMode:
+    """How to profile starlark code."""
+
+    HEAP_SUMMARY_ALLOCATED: ProfileMode
+    """The heap profile mode provides information about the time spent in each function and allocations
+    performed by each function. Enabling this mode the side effect of disabling garbage-collection.
+    This profiling mode is the recommended one.
+    """
+
+    HEAP_SUMMARY_RETAINED: ProfileMode
+    """Like heap summary, but information about retained memory after module is frozen."""
+
+    HEAP_FLAME_ALLOCATED: ProfileMode
+    """Like heap profile, but writes output comparible with
+    [flamegraph.pl](https://github.com/brendangregg/FlameGraph/blob/master/flamegraph.pl).
+    """
+
+    HEAP_FLAME_RETAINED: ProfileMode
+    """Like heap flame, but information about retained memory after module is frozen."""
+
+    STATEMENT: ProfileMode
+    """The statement profile mode provides information about time spent in each statement."""
+
+    COVERAGE: ProfileMode
+    """Code coverage."""
+
+    BYTECODE: ProfileMode
+    """The bytecode profile mode provides information about bytecode instructions."""
+
+    BYTECODE_PAIRS: ProfileMode
+    """The bytecode profile mode provides information about bytecode instruction pairs."""
+
+    TIME_FLAME: ProfileMode
+    """Provide output compatible with
+    [flamegraph.pl](https://github.com/brendangregg/FlameGraph/blob/master/flamegraph.pl).
+    """
+
+    TYPECHECK: ProfileMode
+    """Profile runtime typechecking."""
+
 # starlark::syntax
 
 class DialectTypes:

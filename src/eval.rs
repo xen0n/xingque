@@ -7,7 +7,7 @@ use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
 use starlark::environment::{FrozenModule, Module};
 use starlark::errors::Frame;
-use starlark::eval::{CallStack, Evaluator, FileLoader};
+use starlark::eval::{CallStack, Evaluator, FileLoader, ProfileMode};
 use starlark::PrintHandler;
 
 use crate::codemap::PyFileSpan;
@@ -248,6 +248,79 @@ impl PyEvaluator {
         match self.0.eval_function(function, &positional, &named) {
             Ok(sl) => sl2py::py_from_sl_value(py, sl),
             Err(e) => Err(PyRuntimeError::new_err(e.to_string())),
+        }
+    }
+}
+
+/// How to profile starlark code.
+#[pyclass(
+    module = "xingque",
+    name = "ProfileMode",
+    rename_all = "SCREAMING_SNAKE_CASE",
+    frozen,
+    eq,
+    hash
+)]
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub(crate) enum PyProfileMode {
+    /// The heap profile mode provides information about the time spent in each function and allocations
+    /// performed by each function. Enabling this mode the side effect of disabling garbage-collection.
+    /// This profiling mode is the recommended one.
+    HeapSummaryAllocated,
+    /// Like heap summary, but information about retained memory after module is frozen.
+    HeapSummaryRetained,
+    /// Like heap profile, but writes output comparible with
+    /// [flamegraph.pl](https://github.com/brendangregg/FlameGraph/blob/master/flamegraph.pl).
+    HeapFlameAllocated,
+    /// Like heap flame, but information about retained memory after module is frozen.
+    HeapFlameRetained,
+    /// The statement profile mode provides information about time spent in each statement.
+    Statement,
+    /// Code coverage.
+    Coverage,
+    /// The bytecode profile mode provides information about bytecode instructions.
+    Bytecode,
+    /// The bytecode profile mode provides information about bytecode instruction pairs.
+    BytecodePairs,
+    /// Provide output compatible with
+    /// [flamegraph.pl](https://github.com/brendangregg/FlameGraph/blob/master/flamegraph.pl).
+    TimeFlame,
+    /// Profile runtime typechecking.
+    Typecheck,
+}
+
+impl From<ProfileMode> for PyProfileMode {
+    fn from(value: ProfileMode) -> Self {
+        match value {
+            ProfileMode::HeapSummaryAllocated => Self::HeapSummaryAllocated,
+            ProfileMode::HeapSummaryRetained => Self::HeapSummaryRetained,
+            ProfileMode::HeapFlameAllocated => Self::HeapFlameAllocated,
+            ProfileMode::HeapFlameRetained => Self::HeapFlameRetained,
+            ProfileMode::Statement => Self::Statement,
+            ProfileMode::Coverage => Self::Coverage,
+            ProfileMode::Bytecode => Self::Bytecode,
+            ProfileMode::BytecodePairs => Self::BytecodePairs,
+            ProfileMode::TimeFlame => Self::TimeFlame,
+            ProfileMode::Typecheck => Self::Typecheck,
+            // NOTE: check if variants are added after every starlark dep bump!
+            _ => unreachable!(),
+        }
+    }
+}
+
+impl From<PyProfileMode> for ProfileMode {
+    fn from(value: PyProfileMode) -> Self {
+        match value {
+            PyProfileMode::HeapSummaryAllocated => Self::HeapSummaryAllocated,
+            PyProfileMode::HeapSummaryRetained => Self::HeapSummaryRetained,
+            PyProfileMode::HeapFlameAllocated => Self::HeapFlameAllocated,
+            PyProfileMode::HeapFlameRetained => Self::HeapFlameRetained,
+            PyProfileMode::Statement => Self::Statement,
+            PyProfileMode::Coverage => Self::Coverage,
+            PyProfileMode::Bytecode => Self::Bytecode,
+            PyProfileMode::BytecodePairs => Self::BytecodePairs,
+            PyProfileMode::TimeFlame => Self::TimeFlame,
+            PyProfileMode::Typecheck => Self::Typecheck,
         }
     }
 }
