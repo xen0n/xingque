@@ -73,47 +73,74 @@ jobs:
     strategy:
       matrix:
         platform:
+          # CPython
           - runner: ubuntu-latest
             target: x86_64
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: x86
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: aarch64
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: armv7
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: s390x
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: ppc64le
+            interpreter: '3.x'
+          # PyPy
+          - runner: ubuntu-latest
+            target: x86_64
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: x86
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: aarch64
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: x86_64
+            interpreter: pypy3.10
+          - runner: ubuntu-latest
+            target: x86
+            interpreter: pypy3.10
+          - runner: ubuntu-latest
+            target: aarch64
+            interpreter: pypy3.10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.platform.interpreter }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '-F pyo3/abi3,pyo3/abi3-py38' }}
           sccache: 'true'
           manylinux: auto
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-linux-${{ matrix.platform.target }}
+          name: wheels-linux-${{ matrix.platform.target }}-${{ matrix.platform.interpreter }}
           path: dist
       - name: pytest
         if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
         shell: bash
         run: |
           set -e
+          which python3
           python3 -m venv .venv
           source .venv/bin/activate
           pip install xingque --no-index --find-links dist --force-reinstall
           pip install pytest
           pytest
       - name: pytest
-        if: ${{ !startsWith(matrix.platform.target, 'x86') && matrix.platform.target != 'ppc64' }}
+        if: ${{ !startsWith(matrix.platform.target, 'x86') && matrix.platform.target != 'ppc64' && !startsWith(matrix.platform.interpreter, 'pypy') }}
         uses: uraimo/run-on-arch-action@v2
         with:
           arch: ${{ matrix.platform.target }}
@@ -133,30 +160,54 @@ jobs:
     strategy:
       matrix:
         platform:
+          # CPython
           - runner: ubuntu-latest
             target: x86_64
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: x86
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: aarch64
+            interpreter: '3.x'
           - runner: ubuntu-latest
             target: armv7
+            interpreter: '3.x'
+          # PyPy
+          - runner: ubuntu-latest
+            target: x86_64
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: x86
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: aarch64
+            interpreter: pypy3.9
+          - runner: ubuntu-latest
+            target: x86_64
+            interpreter: pypy3.10
+          - runner: ubuntu-latest
+            target: x86
+            interpreter: pypy3.10
+          - runner: ubuntu-latest
+            target: aarch64
+            interpreter: pypy3.10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.platform.interpreter }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '-F pyo3/abi3,pyo3/abi3-py38' }}
           sccache: 'true'
           manylinux: musllinux_1_2
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-musllinux-${{ matrix.platform.target }}
+          name: wheels-musllinux-${{ matrix.platform.target }}-${{ matrix.platform.interpreter }}
           path: dist
       - name: pytest
         if: ${{ startsWith(matrix.platform.target, 'x86_64') }}
@@ -167,6 +218,8 @@ jobs:
           run: |
             set -e
             apk add py3-pip py3-virtualenv
+            which python3
+            which pypy3 || true
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install xingque --no-index --find-links dist --force-reinstall
@@ -183,6 +236,8 @@ jobs:
             apk add py3-virtualenv
           run: |
             set -e
+            which python3
+            which pypy3 || true
             python3 -m virtualenv .venv
             source .venv/bin/activate
             pip install pytest
@@ -194,32 +249,45 @@ jobs:
     strategy:
       matrix:
         platform:
+          # CPython
           - runner: windows-latest
             target: x64
+            interpreter: '3.x'
           - runner: windows-latest
             target: x86
+            interpreter: '3.x'
+          # PyPy
+          - runner: windows-latest
+            target: x64
+            interpreter: 'pypy3.9'
+          - runner: windows-latest
+            target: x64
+            interpreter: 'pypy3.10'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.platform.interpreter }}
           architecture: ${{ matrix.platform.target }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+          # It seems unneeded to force interpreter on Windows, but we need abi3
+          # for non-PyPy
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && '' || '-F pyo3/abi3,pyo3/abi3-py38' }}
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-windows-${{ matrix.platform.target }}
+          name: wheels-windows-${{ matrix.platform.target }}-${{ matrix.platform.interpreter }}
           path: dist
       - name: pytest
         if: ${{ !startsWith(matrix.platform.target, 'aarch64') }}
         shell: bash
         run: |
           set -e
+          which python3
           python3 -m venv .venv
           source .venv/Scripts/activate
           pip install xingque --no-index --find-links dist --force-reinstall
@@ -235,25 +303,30 @@ jobs:
             target: x86_64
           - runner: macos-14
             target: aarch64
+        interpreter:
+          - '3.x'
+          - pypy3.9
+          - pypy3.10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.x
+          python-version: ${{ matrix.interpreter }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --out dist ${{ startsWith(matrix.interpreter, 'pypy') && format('--interpreter {0}', matrix.interpreter) || '-F pyo3/abi3,pyo3/abi3-py38' }}
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-macos-${{ matrix.platform.target }}
+          name: wheels-macos-${{ matrix.platform.target }}-${{ matrix.interpreter }}
           path: dist
       - name: pytest
         run: |
           set -e
+          which python3
           python3 -m venv .venv
           source .venv/bin/activate
           pip install xingque --no-index --find-links dist --force-reinstall
