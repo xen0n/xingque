@@ -19,6 +19,55 @@ permissions:
   contents: read
 
 jobs:
+  coverage:
+    name: Test coverage
+    runs-on: ${{ matrix.platform.runner }}
+    strategy:
+      matrix:
+        platform:
+          - runner: ubuntu-latest
+            target: x86_64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+          cache: pip
+      - name: Setup Rust
+        run: |
+          rustup toolchain install stable --profile minimal -c llvm-tools
+      - name: Install cargo-llvm-cov
+        uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Setup caching for Rust
+        uses: Swatinem/rust-cache@v2
+        # the cache is already keyed by Rust toolchain version that contains OS
+        # OS and arch info, so no further customization is needed.
+        # with:
+        #   key: coverage-cargo-${{ matrix.platform.runner }}-${{ matrix.platform.target }}
+        continue-on-error: true
+      - name: Setup test environment
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install maturin pytest
+      - name: Build wheel with coverage instrumentation
+        run: |
+          . .venv/bin/activate
+          . <(cargo llvm-cov show-env --export-prefix)
+          cargo llvm-cov clean --workspace
+          maturin develop
+      - name: Run pytest and collect coverage
+        shell: bash
+        run: |
+          . .venv/bin/activate
+          . <(cargo llvm-cov show-env --export-prefix)
+          pytest
+          cargo llvm-cov report --release --lcov --output-path coverage.lcov
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.lcov
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   linux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
