@@ -1,16 +1,17 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use anyhow::anyhow;
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::intern;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
+use starlark::codemap::ResolvedFileSpan;
 use starlark::environment::{FrozenModule, Module};
 use starlark::errors::Frame;
 use starlark::eval::{CallStack, Evaluator, FileLoader, ProfileMode};
 use starlark::PrintHandler;
 
-use crate::codemap::PyFileSpan;
+use crate::codemap::{PyFileSpan, PyResolvedFileSpan};
 use crate::environment::{PyFrozenModule, PyGlobals, PyModule};
 use crate::errors::PyFrame;
 use crate::syntax::PyAstModule;
@@ -134,10 +135,22 @@ impl PyEvaluator {
         Ok(())
     }
 
-    // TODO: enable_profile
+    fn enable_profile(&mut self, py: Python, mode: PyProfileMode) -> PyResult<()> {
+        self.ensure_module_available(py)?;
+        self.0.enable_profile(&mode.into())?;
+        Ok(())
+    }
+
     // TODO: write_profile
     // TODO: gen_profile
-    // TODO: coverage
+
+    fn coverage(&self, py: Python) -> PyResult<HashSet<PyResolvedFileSpan>> {
+        self.ensure_module_available(py)?;
+        Ok(self
+            .0
+            .coverage()
+            .map(|x| x.into_iter().map(ResolvedFileSpan::into).collect())?)
+    }
 
     fn enable_terminal_breakpoint_console(&mut self, py: Python) -> PyResult<()> {
         self.ensure_module_available(py)?;
