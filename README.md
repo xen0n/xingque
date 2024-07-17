@@ -1,6 +1,7 @@
 # 星雀 `xingque` ✨🐦
 
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/xen0n/xingque/CI.yml)
+![Codecov](https://img.shields.io/codecov/c/gh/xen0n/xingque)
 ![PyPI - License](https://img.shields.io/pypi/l/xingque)
 ![PyPI - Version](https://img.shields.io/pypi/v/xingque)
 ![Python Version from PEP 621 TOML](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fxen0n%2Fxingque%2Fmain%2Fpyproject.toml)

@@ -96,7 +96,7 @@ def test_magic_method_forwarding():
             self.methods_called.append("call")
             assert foo == 123
             assert bar == "baz"
-            return {"ok": True, "test": ["aaa", "bbb", "ccc"]}
+            return {"ok": True, "test": ["aaa", "bbb", ("ccc",)]}
 
         def __getattr__(self, name: str) -> object:
             self.methods_called.append(f"getattr:{name}")
@@ -110,11 +110,11 @@ def test_magic_method_forwarding():
 
         def __pos__(self) -> str:
             self.methods_called.append("pos")
-            return f"pos"
+            return "pos"
 
         def __neg__(self) -> str:
             self.methods_called.append("neg")
-            return f"neg"
+            return "neg"
 
         def __add__(self, rhs: int) -> str:
             self.methods_called.append("add")
@@ -162,7 +162,7 @@ def test_magic_method_forwarding():
 
         def __invert__(self) -> str:
             self.methods_called.append("invert")
-            return f"invert"
+            return "invert"
 
     text = """
 to_bool = bool(foo)
@@ -249,7 +249,7 @@ bitnot = ~foo
     assert not m.get("gt")
     assert m.get("length") == 111222
     assert m.get("contains")
-    assert m.get("invoke") == {"ok": True, "test": ["aaa", "bbb", "ccc"]}
+    assert m.get("invoke") == {"ok": True, "test": ["aaa", "bbb", ("ccc",)]}
     assert m.get("get_attr") == "return_test_get_attr"
     assert set(recorder.setattr_value.keys()) == {
         "test_set_attr",
