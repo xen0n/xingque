@@ -446,13 +446,20 @@ impl PyFrozenModule {
 
     fn get_option(&self, py: Python, name: &str) -> PyResult<PyObject> {
         match self.0.get_option(name)? {
-            Some(sl) => sl2py::py_from_sl_value(py, sl.value()),
+            Some(sl) => sl2py::py_from_sl_frozen_value(py, unsafe {
+                // Safety TODO
+                sl.unchecked_frozen_value()
+            }),
             None => Ok(py.None()),
         }
     }
 
     fn get(&self, py: Python, name: &str) -> PyResult<PyObject> {
-        sl2py::py_from_sl_value(py, self.0.get(name)?.value())
+        sl2py::py_from_sl_frozen_value(py, {
+            let sl = self.0.get(name)?;
+            // Safety TODO
+            unsafe { sl.unchecked_frozen_value() }
+        })
     }
 
     fn names(slf: &Bound<'_, Self>) -> PyResult<Py<PyFrozenStringValueIterator>> {
