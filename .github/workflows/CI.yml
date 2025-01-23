@@ -119,7 +119,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '-F pyo3/abi3,pyo3/abi3-py38' }}
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '-F pyo3/abi3,pyo3/abi3-py39' }}
           sccache: 'true'
           manylinux: auto
       - name: Build free-threaded wheels
@@ -206,7 +206,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '-F pyo3/abi3,pyo3/abi3-py38' }}
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && format('--interpreter {0}', matrix.platform.interpreter) || '-F pyo3/abi3,pyo3/abi3-py39' }}
           sccache: 'true'
           manylinux: musllinux_1_2
       - name: Build free-threaded wheels
@@ -287,7 +287,7 @@ jobs:
           target: ${{ matrix.platform.target }}
           # It seems unneeded to force interpreter on Windows, but we need abi3
           # for non-PyPy
-          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && '' || '-F pyo3/abi3,pyo3/abi3-py38' }}
+          args: --release --out dist ${{ startsWith(matrix.platform.interpreter, 'pypy') && '' || '-F pyo3/abi3,pyo3/abi3-py39' }}
           sccache: 'true'
       - name: Build free-threaded wheels
         uses: PyO3/maturin-action@v1
@@ -334,7 +334,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist ${{ startsWith(matrix.interpreter, 'pypy') && format('--interpreter {0}', matrix.interpreter) || '-F pyo3/abi3,pyo3/abi3-py38' }}
+          args: --release --out dist ${{ startsWith(matrix.interpreter, 'pypy') && format('--interpreter {0}', matrix.interpreter) || '-F pyo3/abi3,pyo3/abi3-py39' }}
           sccache: 'true'
       - name: Build free-threaded wheels
         uses: PyO3/maturin-action@v1

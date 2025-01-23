@@ -6,7 +6,7 @@ build-backend = "maturin"
 name = "xingque"
 description = "Yet another typed Python binding to starlark-rust"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "Apache-2.0"
 keywords = ["starlark", "starlark-rust", "pyo3"]
 authors = [
