@@ -1,6 +1,6 @@
 [package]
 name = "xingque"
-version = "0.2.1"
+version = "0.3.0-alpha"
 authors = ["WANG Xuerui <git@xen0n.name>"]
 description = "星雀 - Yet another Python binding to starlark-rs"
 license = "Apache-2.0"
