@@ -48,7 +48,7 @@ This project as compared to other known bindings:
 |License|Apache-2.0|Apache-2.0|Apache-2.0|
 |`py.typed`|✅|❌|✅|
 |Binding framework|PyO3|PyO3|cgo|
-|[ABI3] compatibility|✅ any Python &ge; 3.8|❌|❌|
+|[ABI3] compatibility|✅ any Python &ge; 3.9|❌|❌|
 |Bundled ✨|Rust, 0.12.x|Rust, 0.10.x|Go, circa March 2023|
 |Data marshalling|⚡ native FFI|📦 via Python `json`|⚡ native FFI|
 |Accessing opaque 🐍 values from ✨|✅|❌|💥 crashes|

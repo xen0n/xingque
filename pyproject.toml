@@ -4,10 +4,9 @@ build-backend = "maturin"
 
 [project]
 name = "xingque"
-version = "0.2.1"
 description = "Yet another typed Python binding to starlark-rust"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = "Apache-2.0"
 keywords = ["starlark", "starlark-rust", "pyo3"]
 authors = [
@@ -35,7 +34,9 @@ changelog = "https://github.com/xen0n/xingque/blob/main/CHANGELOG.md"
 
 [tool.maturin]
 profile = "release"
-features = ["pyo3/extension-module", "pyo3/abi3", "pyo3/abi3-py38"]
+# ABI3 features are not put here; these are specified via CLI arguments in CI.
+# Tests fail on PyPy3.10 otherwise (3.14 becomes 3 in the round-trip smoke test)
+features = ["pyo3/extension-module"]
 
 [tool.pytest.ini_options]
 addopts = [
